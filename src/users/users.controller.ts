@@ -44,7 +44,14 @@ export class UsersController {
 
   @Get()
   findAll() {
-    return this.usersService.findAll();
+    try {
+      return this.usersService.findAll();
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException(
+        `Une erreur est survenue lors de la récupération de tous les utilisateurs`,
+      );
+    }
   }
 
   @Get(':id')

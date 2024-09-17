@@ -26,8 +26,8 @@ export class UsersService {
     user.name = createUserDto.name;
     user.password = createUserDto.password;
     user.username = createUserDto.username;
-    const savedUser = await this.userRepository.save(user);
-    return new ResponseUserDTO(savedUser);
+    const createdUser = await this.userRepository.save(user);
+    return ResponseUserDTO.fromEntity(createdUser);
   }
 
   private validateRole(roles: string[]) {
@@ -40,20 +40,27 @@ export class UsersService {
     return roles as UserRole[];
   }
 
-  findAll(): Promise<User[]> {
-    return this.userRepository.find();
+  async findAll(): Promise<ResponseUserDTO[]> {
+    const users = await this.userRepository.find();
+    if (users.length === 0) {
+      return [];
+    }
+    const response: ResponseUserDTO[] = users.map((user) =>
+      ResponseUserDTO.fromEntity(user),
+    );
+    return response;
   }
 
   async findOne(id: number) {
     const user = await this.userRepository.findOneByOrFail({ id });
-    return new ResponseUserDTO(user);
+    return ResponseUserDTO.fromEntity(user);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     const existingUser = await this.userRepository.findOneByOrFail({ id });
     Object.assign(existingUser, updateUserDto);
     await this.userRepository.save(existingUser);
-    return new ResponseUserDTO(existingUser);
+    return ResponseUserDTO.fromEntity(existingUser);
   }
 
   async delete(id: number) {

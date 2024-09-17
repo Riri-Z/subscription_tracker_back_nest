@@ -1,4 +1,6 @@
-import { Exclude, Expose } from 'class-transformer';
+import {
+  Expose, plainToInstance
+} from 'class-transformer';
 import { UserRole } from '../enums/UserRole';
 import { User } from '../entities/user.entity';
 
@@ -15,9 +17,6 @@ export class ResponseUserDTO {
   @Expose()
   username: string;
 
-  @Exclude()
-  password: string;
-
   @Expose()
   roles: UserRole[];
 
@@ -27,10 +26,9 @@ export class ResponseUserDTO {
   @Expose()
   updatedAt: Date;
 
-  @Exclude()
-  deletedAt: Date;
-
-  constructor(partial: Partial<User>) {
-    Object.assign(this, partial);
+  static fromEntity(user: User): ResponseUserDTO {
+    return plainToInstance(ResponseUserDTO, user, {
+      excludeExtraneousValues: true,
+    });
   }
 }
