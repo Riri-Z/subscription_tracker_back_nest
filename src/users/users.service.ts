@@ -1,6 +1,8 @@
 import {
   BadRequestException,
+  HttpException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -8,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserRole } from './enums/UserRole';
+import { ResponseUserDTO } from './dto/response-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -16,7 +19,7 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<Partial<User>> {
+  async create(createUserDto: CreateUserDto): Promise<ResponseUserDTO> {
     const user = new User();
     const validRoles = this.validateRole(createUserDto.roles);
     user.roles = validRoles;
@@ -24,15 +27,11 @@ export class UsersService {
     user.name = createUserDto.name;
     user.password = createUserDto.password;
     user.username = createUserDto.username;
-    const { password, updatedAt, deletedAt, ...restProperties } =
-      await this.userRepository.save(user);
-    return restProperties;
+    const savedUser = await this.userRepository.save(user);
+    return new ResponseUserDTO(savedUser);
   }
 
   private validateRole(roles: string[]) {
-    /*
-    - check if roles est dans enum de role
-    */
     const correctRole = roles.filter((role) => UserRole[role] == null);
 
     if (correctRole.length > 0) {
@@ -46,15 +45,22 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    const user = await this.userRepository.findOneByOrFail({ id });
+    return new ResponseUserDTO(user);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const existingUser = await this.userRepository.findOneByOrFail({ id });
+    Object.assign(existingUser, updateUserDto);
+    await this.userRepository.save(existingUser);
+    return new ResponseUserDTO(existingUser);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async delete(id: number) {
+    const result = await this.userRepository.delete({ id });
+    if (result.raw === 0) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
   }
 }
