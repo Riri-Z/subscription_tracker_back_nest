@@ -1,6 +1,4 @@
-import {
-  Expose, plainToInstance
-} from 'class-transformer';
+import { Expose, plainToInstance } from 'class-transformer';
 import { UserRole } from '../enums/UserRole';
 import { User } from '../entities/user.entity';
 

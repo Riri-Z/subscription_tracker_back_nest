@@ -2,13 +2,14 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Provider } from '@nestjs/common';
 
-const MockUserRepository = {
+export const MockUserRepository = {
   find: jest.fn(),
   findOne: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),
+  findOneByOrFail: jest.fn(),
 };
 
 // Surcharge provider with mockRepository

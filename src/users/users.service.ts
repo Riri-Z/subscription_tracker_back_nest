@@ -30,7 +30,7 @@ export class UsersService {
     return ResponseUserDTO.fromEntity(createdUser);
   }
 
-  private validateRole(roles: string[]) {
+  validateRole(roles: string[]) {
     const correctRole = roles.filter((role) => UserRole[role] == null);
 
     if (correctRole.length > 0) {
