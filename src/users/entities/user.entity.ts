@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { UserRole } from '../enums/UserRole';
 
 @Entity({
   name: 'user',
@@ -7,21 +15,29 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
   name: string;
 
+  @Column({ unique: true })
+  username: string;
+
   @Column()
   password: string;
 
-  @Column()
-  roles: string;
+  @Column('text', { array: true })
+  roles: UserRole[];
 
-  @Column()
-  username: string;
+  @CreateDateColumn()
+  createdAt: Date;
 
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
   /*
     TODO :
       created_at
