@@ -11,6 +11,7 @@ const MockUserRepository = {
   delete: jest.fn(),
 };
 
+// Surcharge provider with mockRepository
 export const ProvidersWithMockDomainRepository = (providers: Provider[]) => {
   return [
     ...providers,
