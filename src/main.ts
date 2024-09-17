@@ -4,5 +4,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   await app.listen(3000);
+  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(`DATABASE  is loaded : ${process.env.DATABASE_HOST} `);
 }
 bootstrap();
