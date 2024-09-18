@@ -4,7 +4,6 @@ import {
   MockUserRepository,
   ProvidersWithMockDomainRepository,
 } from './test/test-utils';
-import { ResponseUserDTO } from './dto/response-user.dto';
 import { UserRole } from './enums/UserRole';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -170,7 +169,7 @@ describe('UsersService unit tests', () => {
         existingUser,
         updateUserBodyDto,
       );
-      console.log(existingUserUpdated);
+
       MockUserRepository.save.mockReturnValue(existingUserUpdated);
 
       const user = await userService.update(id, updateUserBodyDto);

@@ -13,6 +13,7 @@ import {
   ClassSerializerInterceptor,
   NotFoundException,
   InternalServerErrorException,
+  ConflictException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -33,7 +34,10 @@ export class UsersController {
       return ResponseUserDTO.fromEntity(newUser);
     } catch (error) {
       console.error(error);
-      if (error instanceof BadRequestException) {
+      // 23505 is a code from typeORM when there is conflict on uniqueness
+      if (error.code === '23505') {
+        throw new ConflictException(error.detail);
+      } else if (error instanceof BadRequestException) {
         throw error;
       } else {
         throw new HttpException(
