@@ -32,55 +32,76 @@ describe('UsersService unit tests', () => {
 
   describe('Create', () => {
     it('Should create a new user', async () => {
+      //Body
       const createUserDto: CreateUserDto = {
-        email: 'test@example.com',
-        name: 'Test User',
-        username: 'testuser',
-        password: 'password123',
-        roles: [UserRole.USER],
+        email: 'user3@gmail.com',
+        name: 'user3',
+        username: 'user3',
+        password: 'testPassword',
+        roles: [UserRole.ADMIN],
       };
+      //Return after repository save()
       const createdUser = {
-        id: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        ...createUserDto,
+        id: 3,
+        email: 'user3@gmail.com',
+        name: 'user3',
+        username: 'user3',
+        password: 'testPassword',
+        roles: [UserRole.ADMIN],
+        createdAt: new Date('2024-09-18T09:40:04.345Z'),
+        updatedAt: new Date('2024-09-18T09:40:04.345Z'),
+        deletedAt: null,
       };
 
-      const expectedResponse: ResponseUserDTO = {
-        id: 1,
-        email: 'test@example.com',
-        name: 'Test User',
-        username: 'testuser',
-        roles: [UserRole.USER],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+      const expectedResponse: User = {
+        id: 3,
+        email: 'user3@gmail.com',
+        name: 'user3',
+        username: 'user3',
+        password: 'testPassword',
+        roles: [UserRole.ADMIN],
+        createdAt: new Date('2024-09-18T09:40:04.345Z'),
+        updatedAt: new Date('2024-09-18T09:40:04.345Z'),
+        deletedAt: null,
       };
 
       //mock save method of the repository
       MockUserRepository.save.mockReturnValue(createdUser);
 
-      jest.spyOn(userService, 'validateRole').mockReturnValue([UserRole.USER]);
+      jest.spyOn(userService, 'validateRole').mockReturnValue([UserRole.ADMIN]);
 
       const user = await userService.create(createUserDto);
       expect(MockUserRepository.save).toHaveBeenCalledWith(
         expect.objectContaining(createUserDto),
       );
       expect(user).toEqual(expectedResponse);
-      expect(user).not.toHaveProperty('password');
     });
   });
 
   describe('findAll', () => {
     it('Should return all users', async () => {
-      const mockData: ResponseUserDTO[] = [
+      const mockData: User[] = [
         {
           id: 6,
           email: 'test@gmail.com',
           name: 'test',
           username: 'test',
+          password: 'testPassword',
           roles: [UserRole.ADMIN],
           createdAt: new Date(),
           updatedAt: new Date(),
+          deletedAt: null,
+        },
+        {
+          id: 3,
+          email: 'user3@gmail.com',
+          name: 'user3',
+          username: 'user3',
+          password: 'testPassword',
+          roles: [UserRole.ADMIN],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deletedAt: null,
         },
       ];
       jest.spyOn(userService, 'findAll').mockResolvedValue(mockData);
@@ -97,17 +118,16 @@ describe('UsersService unit tests', () => {
         password: 'test',
         username: 'test',
         roles: [UserRole.ADMIN],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: new Date(),
+        createdAt: new Date('2024-09-18T09:40:04.345Z'),
+        updatedAt: new Date('2024-09-18T09:40:04.345Z'),
+        deletedAt: null,
       };
-      const { password, deletedAt, ...userResponseMock } = userMock;
+
       MockUserRepository.findOneByOrFail.mockReturnValue(userMock);
       const id = 13;
       const user = await userService.findOneById(id);
       expect(MockUserRepository.findOneByOrFail).toHaveBeenCalledWith({ id });
-      expect(user).toEqual(userResponseMock);
-      expect(user).not.toHaveProperty('password');
+      expect(user).toEqual(userMock);
     });
   });
 
@@ -118,18 +138,19 @@ describe('UsersService unit tests', () => {
 
       const updateUserBodyDto: UpdateUserDto = {
         name: 'newName',
-
         roles: role,
       };
 
-      const mockResult: ResponseUserDTO = {
+      const mockResult: User = {
         id,
         email: 'test@gmail.com',
         name: 'newName',
         username: 'test',
+        password: 'test',
         roles: [UserRole.ADMIN],
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
       };
       const existingUser: User = {
         id,
@@ -137,16 +158,20 @@ describe('UsersService unit tests', () => {
         name: 'test',
         password: 'test',
         username: 'test',
-        roles: [UserRole.ADMIN],
+        roles: [UserRole.USER],
         createdAt: new Date(),
         updatedAt: new Date(),
-        deletedAt: new Date(),
+        deletedAt: null,
       };
 
       MockUserRepository.findOneByOrFail.mockReturnValue(existingUser);
 
-      Object.assign(existingUser, updateUserBodyDto);
-      MockUserRepository.save.mockReturnValue(existingUser);
+      const existingUserUpdated = Object.assign(
+        existingUser,
+        updateUserBodyDto,
+      );
+      console.log(existingUserUpdated);
+      MockUserRepository.save.mockReturnValue(existingUserUpdated);
 
       const user = await userService.update(id, updateUserBodyDto);
 
@@ -154,8 +179,6 @@ describe('UsersService unit tests', () => {
         expect.objectContaining(existingUser),
       );
       expect(user).toEqual(mockResult);
-
-      expect(user).not.toHaveProperty('password');
     });
   });
 });

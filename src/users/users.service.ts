@@ -18,7 +18,7 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<ResponseUserDTO> {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     const user = new User();
     const validRoles = this.validateRole(createUserDto.roles);
     user.roles = validRoles;
@@ -26,8 +26,7 @@ export class UsersService {
     user.name = createUserDto.name;
     user.password = createUserDto.password;
     user.username = createUserDto.username;
-    const createdUser = await this.userRepository.save(user);
-    return ResponseUserDTO.fromEntity(createdUser);
+    return await this.userRepository.save(user);
   }
 
   validateRole(roles: string[]) {
@@ -40,27 +39,22 @@ export class UsersService {
     return roles as UserRole[];
   }
 
-  async findAll(): Promise<ResponseUserDTO[]> {
-    const users = await this.userRepository.find();
-    if (users.length === 0) {
-      return [];
-    }
-    const response: ResponseUserDTO[] = users.map((user) =>
-      ResponseUserDTO.fromEntity(user),
-    );
-    return response;
+  async findAll(): Promise<User[]> {
+    return await this.userRepository.find();
   }
 
   async findOneById(id: number) {
-    const user = await this.userRepository.findOneByOrFail({ id });
-    return ResponseUserDTO.fromEntity(user);
+    return await this.userRepository.findOneByOrFail({ id });
+  }
+
+  async findOneByUsername(username: string) {
+    return await this.userRepository.findOneByOrFail({ username });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     const existingUser = await this.userRepository.findOneByOrFail({ id });
     Object.assign(existingUser, updateUserDto);
-    await this.userRepository.save(existingUser);
-    return ResponseUserDTO.fromEntity(existingUser);
+    return await this.userRepository.save(existingUser);
   }
 
   async delete(id: number) {

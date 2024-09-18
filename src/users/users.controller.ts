@@ -18,6 +18,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EntityNotFoundError } from 'typeorm';
+import { ResponseUserDTO } from './dto/response-user.dto';
 
 // TODO :  Add global error handler
 @UseInterceptors(ClassSerializerInterceptor)
@@ -28,7 +29,8 @@ export class UsersController {
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     try {
-      return await this.usersService.create(createUserDto);
+      const newUser = await this.usersService.create(createUserDto);
+      return ResponseUserDTO.fromEntity(newUser);
     } catch (error) {
       console.error(error);
       if (error instanceof BadRequestException) {
@@ -43,9 +45,10 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     try {
-      return this.usersService.findAll();
+      const users = await this.usersService.findAll();
+      return users.map((user) => ResponseUserDTO.fromEntity(user));
     } catch (error) {
       console.error(error);
       throw new InternalServerErrorException(
@@ -55,9 +58,10 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: number) {
     try {
-      return await this.usersService.findOneById(+id);
+      const user = await this.usersService.findOneById(+id);
+      return ResponseUserDTO.fromEntity(user);
     } catch (error) {
       console.error(error);
       if (error instanceof EntityNotFoundError) {
@@ -73,10 +77,31 @@ export class UsersController {
         );
     }
   }
+  @Get(':username')
+  async findOneByUsername(@Param('username') username: string) {
+    try {
+      const user = await this.usersService.findOneByUsername(username);
+      return ResponseUserDTO.fromEntity(user);
+    } catch (error) {
+      console.error(error);
+      if (error instanceof EntityNotFoundError) {
+        throw new HttpException(
+          `L'utilisateur avec l'username ${username} n'a pas été trouvé`,
+          HttpStatus.NOT_FOUND,
+        );
+      } else
+        throw new HttpException(
+          "Une erreur est survenue lors de la récupération de l'utilisateur, username : " +
+            username,
+          HttpStatus.BAD_REQUEST,
+        );
+    }
+  }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+    const updatedUser = await this.usersService.update(id, updateUserDto);
+    return ResponseUserDTO.fromEntity(updatedUser);
   }
 
   @Delete(':id')
