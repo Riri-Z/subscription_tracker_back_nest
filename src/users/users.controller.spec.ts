@@ -1,7 +1,10 @@
+import * as request from 'supertest'; // Allow call api
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { ProvidersWithMockDomainRepository } from './test/test-utils';
+import { UsersModule } from './users.module';
+import { INestApplication } from '@nestjs/common';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -14,8 +17,9 @@ describe('UsersController', () => {
 
     controller = module.get<UsersController>(UsersController);
   });
-
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  it('/get users', async () => {});
 });
