@@ -88,7 +88,7 @@ describe('UsersService unit tests', () => {
       expect(await userService.findAll()).toBe(mockData);
     });
   });
-  describe('findOne', () => {
+  describe('findOneById', () => {
     it('Should return a user', async () => {
       const userMock: User = {
         id: 13,
@@ -104,7 +104,7 @@ describe('UsersService unit tests', () => {
       const { password, deletedAt, ...userResponseMock } = userMock;
       MockUserRepository.findOneByOrFail.mockReturnValue(userMock);
       const id = 13;
-      const user = await userService.findOne(id);
+      const user = await userService.findOneById(id);
       expect(MockUserRepository.findOneByOrFail).toHaveBeenCalledWith({ id });
       expect(user).toEqual(userResponseMock);
       expect(user).not.toHaveProperty('password');

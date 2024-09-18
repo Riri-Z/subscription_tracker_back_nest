@@ -51,7 +51,7 @@ export class UsersService {
     return response;
   }
 
-  async findOne(id: number) {
+  async findOneById(id: number) {
     const user = await this.userRepository.findOneByOrFail({ id });
     return ResponseUserDTO.fromEntity(user);
   }
