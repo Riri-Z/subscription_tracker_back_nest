@@ -7,6 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { User } from './users/entities/user.entity';
+import { ApiResponseService } from './shared/api-response/api-response.service';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -15,6 +17,7 @@ import { User } from './users/entities/user.entity';
     }),
     UsersModule,
     AuthModule,
+    SharedModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST,
