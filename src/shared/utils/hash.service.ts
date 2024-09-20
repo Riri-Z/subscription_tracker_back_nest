@@ -18,7 +18,7 @@ export class HashService {
 
   async comparePassword(hash, providedPassword) {
     try {
-      const isMatch = await bcrypt.compare(hash, providedPassword);
+      const isMatch = await bcrypt.compare(providedPassword, hash);
       return isMatch;
     } catch (error) {
       throw new InternalServerErrorException(

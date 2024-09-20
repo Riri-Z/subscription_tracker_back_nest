@@ -26,9 +26,6 @@ export class AuthService {
 
       return null;
     } catch (error) {
-      if (error instanceof InternalServerErrorException) {
-        throw error;
-      }
       throw new InternalServerErrorException('Error validating user', {
         cause: error,
       });
