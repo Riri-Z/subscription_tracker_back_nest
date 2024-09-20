@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -9,23 +10,37 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserRole } from './enums/UserRole';
+import { HashService } from 'src/shared/utils/hash.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+
+    private hashService: HashService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = new User();
-    const validRoles = this.validateRole(createUserDto.roles);
-    user.roles = validRoles;
-    user.email = createUserDto.email;
-    user.name = createUserDto.name;
-    user.password = createUserDto.password;
-    user.username = createUserDto.username;
-    return await this.userRepository.save(user);
+    try {
+      const user = new User();
+      const validRoles = this.validateRole(createUserDto.roles);
+      user.roles = validRoles;
+      user.email = createUserDto.email;
+      user.name = createUserDto.name;
+      user.password = await this.hashService.hashPassword(
+        createUserDto.password,
+      );
+      user.username = createUserDto.username;
+      return await this.userRepository.save(user);
+    } catch (error) {
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error creating new user', {
+        cause: error,
+      });
+    }
   }
 
   validateRole(roles: string[]) {

@@ -7,7 +7,7 @@ import { MockUserRepository } from './users/test/test-utils';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 
-describe.only('AppController', () => {
+describe('AppController', () => {
   let appController: AppController;
 
   beforeEach(async () => {

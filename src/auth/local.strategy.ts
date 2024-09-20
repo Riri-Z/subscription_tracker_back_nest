@@ -24,7 +24,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       return user;
     } catch (error) {
       if (error instanceof EntityNotFoundError) {
-        throw new HttpException(`${username} not found`, HttpStatus.NOT_FOUND);
+        throw new HttpException(`User not found`, HttpStatus.NOT_FOUND);
       }
       throw new UnauthorizedException();
     }
