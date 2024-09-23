@@ -1,3 +1,4 @@
+import { jwtConstants } from './constants';
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -17,7 +18,7 @@ import { SharedModule } from 'src/shared/shared.module';
     PassportModule,
     SharedModule,
     JwtModule.register({
-      secret: `${process.env.JWT_SECRET}`,
+      secret: jwtConstants.secret,
       signOptions: { expiresIn: '1d' },
     }),
   ],

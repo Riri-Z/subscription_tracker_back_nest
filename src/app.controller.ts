@@ -29,7 +29,20 @@ export class AppController {
   @Post('auth/login')
   async login(@Request() req) {
     const result = await this.authService.login(req.user);
-    return this.apiResponseService.apiResponse(HttpStatus.CREATED, result);
+    return this.apiResponseService.apiResponse(HttpStatus.OK, result);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('auth/logout')
+  async logout(@Request() req) {
+    const result = await this.authService.logout(req.user);
+    return this.apiResponseService.apiResponse(HttpStatus.OK, result);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('auth/session')
+  async session(@Request() req) {
+    return { message: 'Authenticated', user: req.user };
   }
 
   @UseGuards(JwtAuthGuard)

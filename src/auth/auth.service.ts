@@ -44,4 +44,9 @@ export class AuthService {
       });
     }
   }
+
+  async logout(req) {
+    console.log('log out user : ', req);
+    return 'User  has been log out';
+  }
 }
