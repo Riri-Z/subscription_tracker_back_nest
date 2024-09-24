@@ -14,7 +14,7 @@ export class Subscription {
   @Column()
   icon_name: string;
 
-  @Column()
+  @Column({ default: 'other' })
   category: string;
 
   @OneToMany(

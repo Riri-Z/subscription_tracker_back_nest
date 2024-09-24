@@ -6,10 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { UserSubscriptionsService } from './user-subscriptions.service';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
 import { UpdateUserSubscriptionDto } from './dto/update-user-subscription.dto';
+
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('user-subscriptions')
 export class UserSubscriptionsController {
@@ -17,8 +20,10 @@ export class UserSubscriptionsController {
     private readonly userSubscriptionsService: UserSubscriptionsService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createUserSubscriptionDto: CreateUserSubscriptionDto) {
+    //check if userId is the same as in jwt
     return this.userSubscriptionsService.create(createUserSubscriptionDto);
   }
 

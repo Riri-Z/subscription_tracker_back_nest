@@ -29,10 +29,18 @@ export class UserSubscriptions {
   @Column()
   amount: number;
 
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: BillingCycle,
+    default: BillingCycle.MONTHLY,
+  })
   billingCycle: BillingCycle;
 
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: StatusSubscription,
+    default: StatusSubscription.ACTIVE,
+  })
   status: StatusSubscription;
 
   @ManyToOne(

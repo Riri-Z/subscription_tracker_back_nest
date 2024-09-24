@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -34,8 +35,12 @@ export class UsersService {
       user.username = createUserDto.username;
       return await this.userRepository.save(user);
     } catch (error) {
-      if (error instanceof InternalServerErrorException) {
+      if (error instanceof BadRequestException) {
         throw error;
+      }
+      // Code PostgreSQL for violation constraint
+      if (error.code === '23505') {
+        throw new ConflictException('Username or email already exists');
       }
       throw new InternalServerErrorException('Error creating new user', {
         cause: error,

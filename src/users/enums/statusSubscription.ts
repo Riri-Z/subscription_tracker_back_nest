@@ -1,5 +1,5 @@
 export enum StatusSubscription {
-  ACTIVE,
-  CANCELLED,
-  PAUSED,
+  ACTIVE = 'ACTIVE',
+  CANCELLED = 'CANCELLED',
+  PAUSED = 'PAUSED',
 }

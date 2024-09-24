@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,8 +16,20 @@ export class SubscriptionsService {
     private subscriptionRepository: Repository<Subscription>,
   ) {}
 
-  create(createSubscriptionDto: CreateSubscriptionDto) {
-    return 'This action adds a new subscription';
+  async create(createSubscriptionDto: CreateSubscriptionDto) {
+    try {
+      return await this.subscriptionRepository.save(createSubscriptionDto);
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new ConflictException('this category already exists');
+      }
+      throw new InternalServerErrorException(
+        'Error creating new subscription',
+        {
+          cause: error,
+        },
+      );
+    }
   }
 
   findAll() {
@@ -22,6 +38,10 @@ export class SubscriptionsService {
 
   findOne(id: number) {
     return `This action returns a #${id} subscription`;
+  }
+
+  async findByName(name: string) {
+    return await this.subscriptionRepository.findOneBy({ name });
   }
 
   update(id: number, updateSubscriptionDto: UpdateSubscriptionDto) {

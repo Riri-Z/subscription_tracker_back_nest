@@ -1,5 +1,5 @@
 export enum BillingCycle {
-  WEEKLY,
-  MONTHLY,
-  YEARLY,
+  WEEKLY = 'WEEKLY',
+  MONTHLY = 'MONTHLY',
+  YEARLY = 'YEARLY',
 }
