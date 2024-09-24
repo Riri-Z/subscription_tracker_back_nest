@@ -7,8 +7,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { User } from './users/entities/user.entity';
-import { ApiResponseService } from './shared/api-response/api-response.service';
 import { SharedModule } from './shared/shared.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { Subscription } from './subscriptions/entities/subscription.entity';
+import { UserSubscriptions } from './users/entities/userSubscriptions.entity';
 
 @Module({
   imports: [
@@ -25,13 +27,14 @@ import { SharedModule } from './shared/shared.module';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [User],
+      entities: [User, Subscription, UserSubscriptions],
       synchronize: true,
     }),
+    SubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 }

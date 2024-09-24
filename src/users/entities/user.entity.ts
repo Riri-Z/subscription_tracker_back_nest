@@ -3,10 +3,12 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserRole } from '../enums/UserRole';
+import { UserSubscriptions } from './userSubscriptions.entity';
 
 @Entity({
   name: 'user',
@@ -38,9 +40,10 @@ export class User {
 
   @DeleteDateColumn()
   deletedAt: Date;
-  /*
-    TODO :
-      created_at
-      updated_at
-      */
+
+  @OneToMany(
+    () => UserSubscriptions,
+    (userSubscriptions) => userSubscriptions.subscription,
+  )
+  public userSubscriptions: UserSubscriptions[];
 }
