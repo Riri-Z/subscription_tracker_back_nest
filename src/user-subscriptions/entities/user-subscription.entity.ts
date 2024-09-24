@@ -1,8 +1,8 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { BillingCycle } from '../enums/billingCycle';
-import { StatusSubscription } from '../enums/statusSubscription';
+import { BillingCycle } from '../../users/enums/billingCycle';
+import { StatusSubscription } from '../../users/enums/statusSubscription';
 import { Subscription } from 'src/subscriptions/entities/subscription.entity';
-import { User } from './user.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity({
   name: 'user_subscription',

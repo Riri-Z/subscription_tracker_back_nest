@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UserRole } from '../enums/UserRole';
-import { UserSubscriptions } from './userSubscriptions.entity';
+import { UserSubscriptions } from 'src/user-subscriptions/entities/user-subscription.entity';
 
 @Entity({
   name: 'user',

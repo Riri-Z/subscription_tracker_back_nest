@@ -1,4 +1,4 @@
-import { UserSubscriptions } from 'src/users/entities/userSubscriptions.entity';
+import { UserSubscriptions } from 'src/user-subscriptions/entities/user-subscription.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({
@@ -10,6 +10,9 @@ export class Subscription {
 
   @Column({ unique: true })
   name: string;
+
+  @Column()
+  icon_name: string;
 
   @Column()
   category: string;

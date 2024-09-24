@@ -6,7 +6,7 @@ import { Subscription } from './entities/subscription.entity';
 import { SharedModule } from 'src/shared/shared.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Subscription]), SharedModule],
+  imports: [TypeOrmModule.forFeature([Subscription]), SharedModule],
   controllers: [SubscriptionsController],
   providers: [SubscriptionsService],
 })

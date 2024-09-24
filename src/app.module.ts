@@ -10,7 +10,8 @@ import { User } from './users/entities/user.entity';
 import { SharedModule } from './shared/shared.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { Subscription } from './subscriptions/entities/subscription.entity';
-import { UserSubscriptions } from './users/entities/userSubscriptions.entity';
+import { UserSubscriptionsModule } from './user-subscriptions/user-subscriptions.module';
+import { UserSubscriptions } from './user-subscriptions/entities/user-subscription.entity';
 
 @Module({
   imports: [
@@ -28,13 +29,15 @@ import { UserSubscriptions } from './users/entities/userSubscriptions.entity';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       entities: [User, Subscription, UserSubscriptions],
+      /* delete this in production and use migration if needed */
       synchronize: true,
     }),
     SubscriptionsModule,
+    UserSubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
 }
