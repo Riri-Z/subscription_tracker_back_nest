@@ -7,6 +7,9 @@ import {
   Param,
   Delete,
   UseGuards,
+  Request,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserSubscriptionsService } from './user-subscriptions.service';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
@@ -27,9 +30,17 @@ export class UserSubscriptionsController {
     return this.userSubscriptionsService.create(createUserSubscriptionDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.userSubscriptionsService.findAll();
+  findAll(@Request() req) {
+    const userId = req?.user?.userId;
+    if (!userId) {
+      throw new HttpException(
+        "Impossible de récupérer l'utilisateur",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return this.userSubscriptionsService.findAll(userId);
   }
 
   @Get(':id')

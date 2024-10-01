@@ -61,8 +61,12 @@ export class UserSubscriptionsService {
     }
   }
 
-  findAll() {
-    return `This action returns all userSubscriptions`;
+  findAll(userId: number): Promise<UserSubscriptions[]> {
+    try {
+      return this.userSubscriptionRepository.findBy({ userId: userId });
+    } catch (error) {
+      throw error;
+    }
   }
 
   findOne(id: number) {
