@@ -61,14 +61,12 @@ export class UserSubscriptionsService {
     }
   }
 
-  findAll(userId: number): Promise<UserSubscriptions[]> {
-    try {
-      return this.userSubscriptionRepository.findBy({ userId: userId });
-    } catch (error) {
-      throw error;
-    }
+  async findAll(userId: number): Promise<UserSubscriptions[]> {
+    return await this.userSubscriptionRepository.find({
+      relations: { subscription: true },
+      where: { userId },
+    });
   }
-
   findOne(id: number) {
     return `This action returns a #${id} userSubscription`;
   }
