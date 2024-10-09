@@ -33,14 +33,27 @@ export class UserSubscriptionsController {
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Request() req) {
-    const userId = req?.user?.userId;
+    const userId: number = req?.user?.userId;
     if (!userId) {
       throw new HttpException(
         "Impossible de récupérer l'utilisateur",
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.UNAUTHORIZED,
       );
     }
     return this.userSubscriptionsService.findAll(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':date') //expected date format => (utc, eg: 2024-09-24T21:35:25.701Z or "YYYY-MMM", eg: 2024-09)
+  findSubscriptionsByMonth(@Request() req, @Param('date') date: string) {
+    const userId: number = req?.user?.userId;
+    if (!userId) {
+      throw new HttpException(
+        "Impossible de récupérer l'utilisateur",
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    return this.userSubscriptionsService.findByMonth(date, userId);
   }
 
   @Get(':id')

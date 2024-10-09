@@ -5,10 +5,11 @@ import {
 } from '@nestjs/common';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
 import { UpdateUserSubscriptionDto } from './dto/update-user-subscription.dto';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { UserSubscriptions } from './entities/user-subscription.entity';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class UserSubscriptionsService {
@@ -67,6 +68,34 @@ export class UserSubscriptionsService {
       where: { userId },
     });
   }
+
+  async findByMonth(date: string, userId: number) {
+    try {
+      const startDate = dayjs(date).startOf('month').toDate();
+      const endDate = dayjs(date).endOf('month').toDate();
+      const subscriptions = await this.userSubscriptionRepository.find({
+        relations: { subscription: true },
+        where: { userId, renewalDate: Between(startDate, endDate) },
+      });
+
+      if (subscriptions.length === 0) {
+        console.log(
+          `No subscriptions found for the following userID and date :  ${userId},   ${date}`,
+        );
+      }
+
+      return subscriptions;
+    } catch (error) {
+      console.error(
+        `Erreur lors de la recherche des souscriptions: ${error.message}`,
+      );
+
+      throw new InternalServerErrorException(
+        'Erreur lors de la récupération des souscriptions mensuelles',
+      );
+    }
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} userSubscription`;
   }
