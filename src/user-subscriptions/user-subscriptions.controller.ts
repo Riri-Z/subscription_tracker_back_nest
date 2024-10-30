@@ -14,8 +14,8 @@ import {
 import { UserSubscriptionsService } from './user-subscriptions.service';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
 import { UpdateUserSubscriptionDto } from './dto/update-user-subscription.dto';
-
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('user-subscriptions')
 export class UserSubscriptionsController {
@@ -24,6 +24,7 @@ export class UserSubscriptionsController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @Post()
   create(@Body() createUserSubscriptionDto: CreateUserSubscriptionDto) {
     //check if userId is the same as in jwt
@@ -31,6 +32,7 @@ export class UserSubscriptionsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @Get()
   findAll(@Request() req) {
     const userId: number = req?.user?.userId;
@@ -44,6 +46,7 @@ export class UserSubscriptionsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @Get(':date') //expected date format => (utc, eg: 2024-09-24T21:35:25.701Z or "YYYY-MMM", eg: 2024-09)
   findSubscriptionsByMonth(@Request() req, @Param('date') date: string) {
     const userId: number = req?.user?.userId;

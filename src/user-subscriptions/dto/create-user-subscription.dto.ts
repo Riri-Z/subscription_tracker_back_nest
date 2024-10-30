@@ -30,7 +30,7 @@ export class CreateUserSubscriptionDto {
   @IsNotEmpty()
   amount: number;
 
-  @ApiProperty()
+  @ApiProperty({ enum: BillingCycle, isArray: false })
   @IsNotEmpty()
   billingCycle: BillingCycle;
 

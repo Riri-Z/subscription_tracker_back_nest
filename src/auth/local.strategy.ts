@@ -11,7 +11,7 @@ import { EntityNotFoundError } from 'typeorm';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
-  constructor(private authService: AuthService) {
+  constructor(private readonly authService: AuthService) {
     // this is for local strategy, if we want to implement options , we can add  options objec
     //e.g  : super({ usernameField: 'email' })
     super();

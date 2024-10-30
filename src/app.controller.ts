@@ -11,6 +11,7 @@ import { AppService } from './app.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { ApiResponseService } from './shared/api-response/api-response.service';
+import { ApiBasicAuth, ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller()
 export class AppController {
@@ -26,6 +27,7 @@ export class AppController {
   }
 
   @UseGuards(LocalAuthGuard)
+  @ApiBasicAuth()
   @Post('auth/login')
   async login(@Request() req) {
     const result = await this.authService.login(req.user);
@@ -33,6 +35,7 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @Post('auth/logout')
   async logout(@Request() req) {
     const result = await this.authService.logout(req.user);
@@ -40,12 +43,14 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @Post('auth/session')
   async session(@Request() req) {
     return { message: 'Authenticated', user: req.user };
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @Get('profile')
   getProfile(@Request() req) {
     return { message: 'welcome to user profile', body: req.user };
