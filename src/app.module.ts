@@ -39,5 +39,5 @@ import { UserSubscriptions } from './user-subscriptions/entities/user-subscripti
   providers: [AppService],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) {}
+  constructor(private readonly dataSource: DataSource) {}
 }

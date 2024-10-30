@@ -7,9 +7,9 @@ import { HashService } from 'src/shared/utils/hash.service';
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UsersService,
-    private jwtService: JwtService,
-    private hashService: HashService,
+    private readonly userService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly hashService: HashService,
   ) {}
 
   validateUser = async (username: string, password: string) => {

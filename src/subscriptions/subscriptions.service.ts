@@ -13,7 +13,7 @@ import { Repository } from 'typeorm';
 export class SubscriptionsService {
   constructor(
     @InjectRepository(Subscription)
-    private subscriptionRepository: Repository<Subscription>,
+    private readonly subscriptionRepository: Repository<Subscription>,
   ) {}
 
   async create(createSubscriptionDto: CreateSubscriptionDto) {

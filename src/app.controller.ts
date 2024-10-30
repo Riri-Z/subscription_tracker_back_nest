@@ -16,8 +16,8 @@ import { ApiResponseService } from './shared/api-response/api-response.service';
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    private authService: AuthService,
-    private apiResponseService: ApiResponseService,
+    private readonly authService: AuthService,
+    private readonly apiResponseService: ApiResponseService,
   ) {}
 
   @Get()

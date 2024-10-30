@@ -17,9 +17,9 @@ import { HashService } from 'src/shared/utils/hash.service';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
 
-    private hashService: HashService,
+    private readonly hashService: HashService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
