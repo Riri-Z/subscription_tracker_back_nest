@@ -15,8 +15,8 @@ import dayjs from 'dayjs';
 export class UserSubscriptionsService {
   constructor(
     @InjectRepository(UserSubscriptions)
-    private userSubscriptionRepository: Repository<UserSubscriptions>,
-    private subscriptionsService: SubscriptionsService,
+    private readonly userSubscriptionRepository: Repository<UserSubscriptions>,
+    private readonly subscriptionsService: SubscriptionsService,
   ) {}
 
   async create(createUserSubscriptionDto: CreateUserSubscriptionDto) {

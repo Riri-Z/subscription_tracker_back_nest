@@ -35,7 +35,7 @@ export class UserSubscriptionsController {
   @ApiBearerAuth('jwt')
   @Get()
   findAll(@Request() req) {
-    const userId: number = req?.user?.userId;
+    const userId: number = req?.user?.sub;
     if (!userId) {
       throw new HttpException(
         "Impossible de récupérer l'utilisateur",
@@ -49,7 +49,7 @@ export class UserSubscriptionsController {
   @ApiBearerAuth('jwt')
   @Get(':date') //expected date format => (utc, eg: 2024-09-24T21:35:25.701Z or "YYYY-MMM", eg: 2024-09)
   findSubscriptionsByMonth(@Request() req, @Param('date') date: string) {
-    const userId: number = req?.user?.userId;
+    const userId: number = req?.user?.sub;
     if (!userId) {
       throw new HttpException(
         "Impossible de récupérer l'utilisateur",
