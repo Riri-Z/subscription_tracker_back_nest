@@ -7,12 +7,17 @@ describe('UserSubscriptionsController', () => {
   let service: UserSubscriptionsService;
 
   const mockUserSubscriptionsService = {
-    create: jest.fn().mockReturnValue(),
+    create: jest.fn(),
   };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserSubscriptionsController],
-      providers: [{ provide: UserSubscriptionsService, useValue: {} }],
+      providers: [
+        {
+          provide: UserSubscriptionsService,
+          useValue: mockUserSubscriptionsService,
+        },
+      ],
     }).compile();
 
     controller = module.get<UserSubscriptionsController>(

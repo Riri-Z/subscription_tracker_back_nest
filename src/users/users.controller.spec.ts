@@ -70,12 +70,9 @@ describe.only('UsersController', () => {
       createdAt: '2024-09-20T06:49:54.013Z',
       updatedAt: '2024-09-20T06:49:54.013Z',
     }),
-    delete: (id: number) =>
-      jest
-        .fn()
-        .mockReturnValue(
-          `Utilisateur avec l'id ${id} a été supprimé avec succès`,
-        ),
+    delete: jest.fn(
+      (id: number) => `Utilisateur avec l'id ${id} a été supprimé avec succès`,
+    ),
   };
 
   beforeEach(async () => {
