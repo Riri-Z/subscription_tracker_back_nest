@@ -9,7 +9,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { EntityNotFoundError, Repository } from 'typeorm';
 import { UserRole } from './enums/UserRole';
 import { HashService } from 'src/shared/utils/hash.service';
 
@@ -71,9 +71,16 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const existingUser = await this.userRepository.findOneByOrFail({ id });
-    Object.assign(existingUser, updateUserDto);
-    return await this.userRepository.save(existingUser);
+    try {
+      const existingUser = await this.userRepository.findOneByOrFail({ id });
+      Object.assign(existingUser, updateUserDto);
+      return await this.userRepository.save(existingUser);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(`id : ${id} not found`);
+      }
+      throw error;
+    }
   }
 
   async delete(id: number) {

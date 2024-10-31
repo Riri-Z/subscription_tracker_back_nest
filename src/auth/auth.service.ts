@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { HashService } from 'src/shared/utils/hash.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -10,6 +11,7 @@ export class AuthService {
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
     private readonly hashService: HashService,
+    private readonly configService: ConfigService,
   ) {}
 
   validateUser = async (username: string, password: string) => {
@@ -34,10 +36,7 @@ export class AuthService {
 
   async login(user: User) {
     try {
-      const payload = { username: user.username, sub: user.id };
-      return {
-        access_token: this.jwtService.sign(payload),
-      };
+      return await this.getTokens(user.id, user.username);
     } catch (error) {
       throw new InternalServerErrorException('Error login user', {
         cause: error,
@@ -48,5 +47,35 @@ export class AuthService {
   async logout(req) {
     console.log('log out user : ', req);
     return 'User  has been log out';
+  }
+
+  async getTokens(userId: number, username: string) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        {
+          sub: userId,
+          username,
+        },
+        {
+          secret: this.configService.get<string>('JWT_SECRET'),
+          expiresIn: '2h',
+        },
+      ),
+      this.jwtService.signAsync(
+        {
+          sub: userId,
+          username,
+        },
+        {
+          secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+          expiresIn: '7d',
+        },
+      ),
+    ]);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 }

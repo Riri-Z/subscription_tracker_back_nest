@@ -12,10 +12,15 @@ export const MockUserRepository = {
   findOneByOrFail: jest.fn(),
 };
 
-// Mock pour HashService
+// Mock for HashService
 export const mockHashService = {
   hashPassword: jest.fn().mockResolvedValue('hashPassword'),
   comparePassword: jest.fn().mockResolvedValue(true),
+};
+
+// Mock for configService
+export const mockConfigService = {
+  get: jest.fn().mockReturnValue('some-secret'),
 };
 
 // Surcharge provider with mockRepository

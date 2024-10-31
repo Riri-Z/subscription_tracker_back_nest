@@ -35,7 +35,7 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('jwt')
   @Post('auth/logout')
   async logout(@Request() req) {
     const result = await this.authService.logout(req.user);
@@ -43,14 +43,14 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('jwt')
   @Post('auth/session')
   async session(@Request() req) {
     return { message: 'Authenticated', user: req.user };
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('jwt')
   @Get('profile')
   getProfile(@Request() req) {
     return { message: 'welcome to user profile', body: req.user };

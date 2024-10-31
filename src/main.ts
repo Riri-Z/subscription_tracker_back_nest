@@ -20,12 +20,12 @@ async function bootstrap() {
       {
         type: 'http',
         scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Enter JWT token',
+        bearerFormat: 'jwt',
+        name: 'jwt',
+        description: 'Enter jwt token',
         in: 'header',
       },
-      'JWT-auth',
+      'jwt',
     )
     .build();
 

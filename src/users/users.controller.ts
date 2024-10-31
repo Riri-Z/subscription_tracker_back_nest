@@ -62,7 +62,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number) {
+  async findOneById(@Param('id') id: number) {
     try {
       const user = await this.usersService.findOneById(+id);
       return ResponseUserDTO.fromEntity(user);
@@ -104,8 +104,16 @@ export class UsersController {
 
   @Patch(':id')
   async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-    const updatedUser = await this.usersService.update(id, updateUserDto);
-    return ResponseUserDTO.fromEntity(updatedUser);
+    try {
+      const updatedUser = await this.usersService.update(id, updateUserDto);
+      return ResponseUserDTO.fromEntity(updatedUser);
+    } catch (error) {
+      console.error('patch user, ', error);
+      throw error;
+      /*      if(error instanceof EntityNotFoundError){
+          throw error
+        } */
+    }
   }
 
   @Delete(':id')

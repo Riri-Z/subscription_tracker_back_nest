@@ -45,5 +45,5 @@ export class User {
     () => UserSubscriptions,
     (userSubscriptions) => userSubscriptions.subscription,
   )
-  public userSubscriptions: UserSubscriptions[];
+  public userSubscriptions?: UserSubscriptions[];
 }

@@ -1,6 +1,5 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
-// Expose properties to swagger module
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger'; // Expose properties to swagger module
 import { UserRole } from '../enums/UserRole';
 
 export class CreateUserDto {

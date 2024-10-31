@@ -24,7 +24,7 @@ export class UserSubscriptionsController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('jwt')
   @Post()
   create(@Body() createUserSubscriptionDto: CreateUserSubscriptionDto) {
     //check if userId is the same as in jwt
@@ -32,7 +32,7 @@ export class UserSubscriptionsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('jwt')
   @Get()
   findAll(@Request() req) {
     const userId: number = req?.user?.userId;
@@ -46,7 +46,7 @@ export class UserSubscriptionsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('jwt')
   @Get(':date') //expected date format => (utc, eg: 2024-09-24T21:35:25.701Z or "YYYY-MMM", eg: 2024-09)
   findSubscriptionsByMonth(@Request() req, @Param('date') date: string) {
     const userId: number = req?.user?.userId;
