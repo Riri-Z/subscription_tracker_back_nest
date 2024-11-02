@@ -22,7 +22,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { EntityNotFoundError } from 'typeorm';
 import { ResponseUserDTO } from './dto/response-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import {  ApiCookieAuth } from '@nestjs/swagger';
+import { ApiCookieAuth } from '@nestjs/swagger';
 // TODO :  Add global error handler
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
