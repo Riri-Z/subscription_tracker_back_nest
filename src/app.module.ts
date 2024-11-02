@@ -38,6 +38,4 @@ import { UserSubscriptions } from './user-subscriptions/entities/user-subscripti
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  constructor(private readonly dataSource: DataSource) {}
-}
+export class AppModule {}

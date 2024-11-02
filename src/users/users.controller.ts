@@ -14,16 +14,20 @@ import {
   NotFoundException,
   InternalServerErrorException,
   ConflictException,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EntityNotFoundError } from 'typeorm';
 import { ResponseUserDTO } from './dto/response-user.dto';
-
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import {  ApiCookieAuth } from '@nestjs/swagger';
 // TODO :  Add global error handler
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
+@ApiCookieAuth()
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

@@ -1,11 +1,17 @@
 import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import {
+  SwaggerModule,
+  DocumentBuilder,
+  SwaggerCustomOptions,
+} from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
+  app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe());
 
   const config = new DocumentBuilder()
@@ -16,21 +22,17 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('subscription')
     .addBasicAuth()
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'jwt',
-        name: 'jwt',
-        description: 'Enter jwt token',
-        in: 'header',
-      },
-      'jwt',
-    )
+    .addCookieAuth()
     .build();
 
+  const customOptions: SwaggerCustomOptions = {
+    swaggerOptions: {
+      withCredentials: true,
+    },
+  };
+
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, documentFactory);
+  SwaggerModule.setup('api', app, documentFactory, customOptions);
 
   await app.listen(process.env.PORT);
   console.log(`Application is running on: ${await app.getUrl()}`);

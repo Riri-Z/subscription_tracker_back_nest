@@ -14,7 +14,11 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly authService: AuthService) {
     // this is for local strategy, if we want to implement options , we can add  options objec
     //e.g  : super({ usernameField: 'email' })
-    super();
+
+    super({
+      usernameField: 'username', // doit correspondre au champ dans le DTO
+      passwordField: 'password',
+    });
   }
 
   async validate(username: string, password: string) {

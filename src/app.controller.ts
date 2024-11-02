@@ -5,13 +5,21 @@ import {
   HttpStatus,
   Post,
   Request,
+  Res,
+  /*  Response, */
   UseGuards,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { ApiResponseService } from './shared/api-response/api-response.service';
-import { ApiBasicAuth, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiBasicAuth,
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+} from '@nestjs/swagger';
+import { Response } from 'express';
 
 @Controller()
 export class AppController {
@@ -29,9 +37,43 @@ export class AppController {
   @UseGuards(LocalAuthGuard)
   @ApiBasicAuth()
   @Post('auth/login')
-  async login(@Request() req) {
-    const result = await this.authService.login(req.user);
-    return this.apiResponseService.apiResponse(HttpStatus.OK, result);
+  @ApiOperation({ summary: 'User login' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        username: {
+          type: 'string',
+          example: 'john.doe@example.com',
+          description: 'User email',
+        },
+        password: {
+          type: 'string',
+          example: 'password123',
+          description: 'User password',
+        },
+      },
+      required: ['username', 'password'],
+    },
+  })
+  async login(@Res({ passthrough: true }) res: Response, @Request() req) {
+    const { accessToken, refreshToken } = await this.authService.login(
+      req?.user,
+    );
+
+    res
+      .cookie('accessToken', accessToken, {
+        maxAge: 1 * 60 * 60 * 1000, //1h,
+        httpOnly: true,
+        secure: true,
+      })
+      .cookie('refreshToken', refreshToken, {
+        maxAge: 1 * 60 * 60 * 1000, //1h,
+        httpOnly: true,
+        secure: true,
+      })
+
+      .send('Welcome');
   }
 
   @UseGuards(JwtAuthGuard)
