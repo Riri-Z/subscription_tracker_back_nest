@@ -25,8 +25,7 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
       const user = new User();
-      const validRoles = this.validateRole(createUserDto.roles);
-      user.roles = validRoles;
+      user.roles = this.validateRole(createUserDto.roles);
       user.email = createUserDto.email;
       user.name = createUserDto.name;
       user.password = await this.hashService.hashPassword(
@@ -75,6 +74,13 @@ export class UsersService {
       if (updateUserDto.roles) {
         this.validateRole(updateUserDto.roles);
       }
+
+      if (updateUserDto.password) {
+        updateUserDto.password = await this.hashService.hashPassword(
+          updateUserDto.password,
+        );
+      }
+
       const existingUser = await this.userRepository.findOneByOrFail({ id });
       Object.assign(existingUser, updateUserDto);
       return await this.userRepository.save(existingUser);

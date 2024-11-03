@@ -22,7 +22,6 @@ describe('UserSubscriptionsController', () => {
     controller = module.get<UserSubscriptionsController>(
       UserSubscriptionsController,
     );
-
   });
 
   it('should be defined', () => {
