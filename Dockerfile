@@ -12,6 +12,7 @@ COPY src/ ./src
 
 RUN npm run build
 
-EXPOSE 3001
+# comment this for now, gcp use another port
+#EXPOSE 3001
 
 CMD [ "node", "dist/main.js" ]
