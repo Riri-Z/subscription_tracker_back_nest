@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { SharedModule } from './shared/shared.module';
 import { mockConfigService, MockUserRepository } from './users/test/test-utils';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
@@ -21,6 +22,7 @@ describe('AppController', () => {
       imports: [
         AuthModule,
         UsersModule,
+        SharedModule,
         ConfigModule.forRoot({
           isGlobal: true,
           load: [

@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SubscriptionsService } from './subscriptions.service';
-import { Repository } from 'typeorm';
 import { Subscription } from './entities/subscription.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';

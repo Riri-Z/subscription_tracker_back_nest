@@ -4,7 +4,6 @@ import { UserSubscriptionsService } from './user-subscriptions.service';
 
 describe('UserSubscriptionsController', () => {
   let controller: UserSubscriptionsController;
-  let service: UserSubscriptionsService;
 
   const mockUserSubscriptionsService = {
     create: jest.fn(),

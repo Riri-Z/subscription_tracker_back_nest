@@ -5,7 +5,6 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { DataSource } from 'typeorm';
 import { User } from './users/entities/user.entity';
 import { SharedModule } from './shared/shared.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
