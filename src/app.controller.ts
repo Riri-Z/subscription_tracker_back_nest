@@ -43,8 +43,8 @@ export class AppController {
       properties: {
         username: {
           type: 'string',
-          example: 'john.doe@example.com',
-          description: 'User email',
+          example: 'myUsername',
+          description: 'Username',
         },
         password: {
           type: 'string',
@@ -56,23 +56,28 @@ export class AppController {
     },
   })
   async login(@Res({ passthrough: true }) res: Response, @Request() req) {
-    const { accessToken, refreshToken } = await this.authService.login(
-      req?.user,
-    );
+    try {
+      const { accessToken, refreshToken } = await this.authService.login(
+        req?.user,
+      );
 
-    res
-      .cookie('accessToken', accessToken, {
-        maxAge: 1 * 60 * 60 * 1000, //1h,
-        httpOnly: true,
-        secure: true,
-      })
-      .cookie('refreshToken', refreshToken, {
-        maxAge: 1 * 60 * 60 * 1000, //1h,
-        httpOnly: true,
-        secure: true,
-      })
+      res
+        .cookie('accessToken', accessToken, {
+          maxAge: 1 * 60 * 60 * 1000, //1h,
+          httpOnly: true,
+          secure: true,
+        })
+        .cookie('refreshToken', refreshToken, {
+          maxAge: 1 * 60 * 60 * 1000, //1h,
+          httpOnly: true,
+          secure: true,
+        })
 
-      .send('Welcome');
+        .send('Welcome');
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   @UseGuards(JwtAuthGuard)
