@@ -72,6 +72,9 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     try {
+      if (updateUserDto.roles) {
+        this.validateRole(updateUserDto.roles);
+      }
       const existingUser = await this.userRepository.findOneByOrFail({ id });
       Object.assign(existingUser, updateUserDto);
       return await this.userRepository.save(existingUser);
