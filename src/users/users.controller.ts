@@ -14,16 +14,19 @@ import {
   NotFoundException,
   InternalServerErrorException,
   ConflictException,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EntityNotFoundError } from 'typeorm';
 import { ResponseUserDTO } from './dto/response-user.dto';
-
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ApiCookieAuth } from '@nestjs/swagger';
 // TODO :  Add global error handler
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
+@ApiCookieAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -35,8 +38,8 @@ export class UsersController {
     } catch (error) {
       console.error(error);
       // 23505 is a code from typeORM when there is conflict on uniqueness
-      if (error.code === '23505') {
-        throw new ConflictException(error.detail);
+      if (error.name === 'ConflictException') {
+        throw new ConflictException(error.message);
       } else if (error instanceof BadRequestException) {
         throw error;
       } else {
@@ -48,6 +51,7 @@ export class UsersController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
     try {
@@ -61,8 +65,9 @@ export class UsersController {
     }
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: number) {
+  @UseGuards(JwtAuthGuard)
+  @Get('id/:id')
+  async findOneById(@Param('id') id: number) {
     try {
       const user = await this.usersService.findOneById(+id);
       return ResponseUserDTO.fromEntity(user);
@@ -81,7 +86,9 @@ export class UsersController {
         );
     }
   }
-  @Get(':username')
+
+  @UseGuards(JwtAuthGuard)
+  @Get('username/:username')
   async findOneByUsername(@Param('username') username: string) {
     try {
       const user = await this.usersService.findOneByUsername(username);
@@ -102,12 +109,19 @@ export class UsersController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-    const updatedUser = await this.usersService.update(id, updateUserDto);
-    return ResponseUserDTO.fromEntity(updatedUser);
+    try {
+      const updatedUser = await this.usersService.update(id, updateUserDto);
+      return ResponseUserDTO.fromEntity(updatedUser);
+    } catch (error) {
+      console.error('patch user, ', error);
+      throw error;
+    }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     try {

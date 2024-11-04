@@ -1,31 +1,50 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { EntityNotFoundError, Repository } from 'typeorm';
 import { UserRole } from './enums/UserRole';
+import { HashService } from 'src/shared/utils/hash.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
+
+    private readonly hashService: HashService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = new User();
-    const validRoles = this.validateRole(createUserDto.roles);
-    user.roles = validRoles;
-    user.email = createUserDto.email;
-    user.name = createUserDto.name;
-    user.password = createUserDto.password;
-    user.username = createUserDto.username;
-    return await this.userRepository.save(user);
+    try {
+      const user = new User();
+      user.roles = this.validateRole(createUserDto.roles);
+      user.email = createUserDto.email;
+      user.name = createUserDto.name;
+      user.password = await this.hashService.hashPassword(
+        createUserDto.password,
+      );
+      user.username = createUserDto.username;
+      return await this.userRepository.save(user);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      // Code PostgreSQL for violation constraint
+      if (error.code === '23505') {
+        throw new ConflictException('Username or email already exists');
+      }
+      throw new InternalServerErrorException('Error creating new user', {
+        cause: error,
+      });
+    }
   }
 
   validateRole(roles: string[]) {
@@ -51,9 +70,26 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const existingUser = await this.userRepository.findOneByOrFail({ id });
-    Object.assign(existingUser, updateUserDto);
-    return await this.userRepository.save(existingUser);
+    try {
+      if (updateUserDto.roles) {
+        this.validateRole(updateUserDto.roles);
+      }
+
+      if (updateUserDto.password) {
+        updateUserDto.password = await this.hashService.hashPassword(
+          updateUserDto.password,
+        );
+      }
+
+      const existingUser = await this.userRepository.findOneByOrFail({ id });
+      Object.assign(existingUser, updateUserDto);
+      return await this.userRepository.save(existingUser);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(`id : ${id} not found`);
+      }
+      throw error;
+    }
   }
 
   async delete(id: number) {

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import {
   MockUserRepository,
+  mockHashService,
   ProvidersWithMockDomainRepository,
 } from './test/test-utils';
 import { UserRole } from './enums/UserRole';
@@ -9,13 +10,19 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { afterEach } from 'node:test';
 import { User } from './entities/user.entity';
+import { HashService } from '../shared/utils/hash.service';
 
 describe('UsersService unit tests', () => {
   let userService: UsersService;
-
   beforeEach(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
-      providers: ProvidersWithMockDomainRepository([UsersService]),
+      providers: ProvidersWithMockDomainRepository([
+        UsersService,
+        {
+          provide: HashService,
+          useValue: mockHashService,
+        },
+      ]),
     }).compile();
 
     userService = moduleRef.get<UsersService>(UsersService);
@@ -45,7 +52,7 @@ describe('UsersService unit tests', () => {
         email: 'user3@gmail.com',
         name: 'user3',
         username: 'user3',
-        password: 'testPassword',
+        password: 'hashPassword',
         roles: [UserRole.ADMIN],
         createdAt: new Date('2024-09-18T09:40:04.345Z'),
         updatedAt: new Date('2024-09-18T09:40:04.345Z'),
@@ -57,19 +64,24 @@ describe('UsersService unit tests', () => {
         email: 'user3@gmail.com',
         name: 'user3',
         username: 'user3',
-        password: 'testPassword',
+        password: 'hashPassword',
         roles: [UserRole.ADMIN],
         createdAt: new Date('2024-09-18T09:40:04.345Z'),
         updatedAt: new Date('2024-09-18T09:40:04.345Z'),
         deletedAt: null,
       };
 
+      const hashPassword = 'hashPassword';
       //mock save method of the repository
       MockUserRepository.save.mockReturnValue(createdUser);
 
       jest.spyOn(userService, 'validateRole').mockReturnValue([UserRole.ADMIN]);
 
       const user = await userService.create(createUserDto);
+      expect(mockHashService.hashPassword).toHaveBeenCalledWith(
+        createUserDto.password,
+      );
+      createUserDto.password = hashPassword;
       expect(MockUserRepository.save).toHaveBeenCalledWith(
         expect.objectContaining(createUserDto),
       );
