@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { EntityNotFoundError } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -21,7 +22,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(username: string, password: string) {
+  async validate(username: string, password: string): Promise<User> {
     try {
       const user = await this.authService.validateUser(username, password);
 

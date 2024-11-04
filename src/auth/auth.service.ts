@@ -4,6 +4,7 @@ import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { HashService } from 'src/shared/utils/hash.service';
 import { ConfigService } from '@nestjs/config';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  validateUser = async (username: string, password: string) => {
+  validateUser = async (username: string, password: string): Promise<User> => {
     try {
       const user = await this.userService.findOneByUsername(username);
       const isMatchPassword = await this.hashService.comparePassword(
@@ -44,8 +45,8 @@ export class AuthService {
     }
   }
 
-  async logout(req) {
-    console.log('log out user : ', req);
+  async logout(user: JwtPayload): Promise<string> {
+    console.log('log out user : ', user);
     return 'User  has been log out';
   }
 
