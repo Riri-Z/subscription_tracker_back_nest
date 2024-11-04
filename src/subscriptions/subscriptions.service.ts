@@ -45,7 +45,7 @@ export class SubscriptionsService {
   }
 
   update(id: number, updateSubscriptionDto: UpdateSubscriptionDto) {
-    return `This action updates a #${id} subscription`;
+    return `This action updates a #${id} subscription with the following values : ${JSON.stringify(updateSubscriptionDto)}`;
   }
 
   remove(id: number) {

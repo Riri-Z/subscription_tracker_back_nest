@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ApiResponseService } from 'src/shared/api-response/api-response.service';
-import { ModuleRef } from '@nestjs/core';
 
 describe('AuthController', () => {
   let controller: AuthController;
