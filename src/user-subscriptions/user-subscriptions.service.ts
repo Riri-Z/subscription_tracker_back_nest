@@ -5,12 +5,13 @@ import {
 } from '@nestjs/common';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
 import { UpdateUserSubscriptionDto } from './dto/update-user-subscription.dto';
-import { Between, Repository } from 'typeorm';
+import { Between, LessThan, Repository } from 'typeorm';
 import { UserSubscriptions } from './entities/user-subscription.entity';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import { StatusSubscription } from 'src/users/enums/statusSubscription';
+import { BillingCycle } from 'src/users/enums/billingCycle';
 
 @Injectable()
 export class UserSubscriptionsService {
@@ -34,8 +35,7 @@ export class UserSubscriptionsService {
             .create({
               name: createUserSubscriptionDto.subscriptionName,
               // TODO : find a way to categorize subscription
-              category:
-                createUserSubscriptionDto?.subscriptionCategory,
+              category: createUserSubscriptionDto?.subscriptionCategory,
               // TODO : find a way to set one by default if possible
               icon_name: createUserSubscriptionDto?.icon_name,
             })
@@ -77,19 +77,30 @@ export class UserSubscriptionsService {
     });
   }
 
-  async findByMonth(date: string, userId: number) {
+  async findActiveSubscriptionByMonth(date: string, userId: number) {
     try {
-      const startDate = dayjs(date).startOf('month').toDate();
-      const endDate = dayjs(date).endOf('month').toDate();
-      const subscriptions = await this.userSubscriptionRepository.find({
+
+      const endDate: Date = dayjs(date).endOf('month').toDate();
+
+      let subscriptions = await this.userSubscriptionRepository.find({
         relations: { subscription: true },
-        where: { userId, renewalDate: Between(startDate, endDate) },
+        where: {
+          userId,
+          status: StatusSubscription['ACTIVE'],
+          startDate: LessThan(endDate),
+        },
       });
 
       if (subscriptions.length === 0) {
         console.log(
           `No subscriptions found for the following userID and date :  ${userId},   ${date}`,
         );
+      } else {
+        subscriptions =
+          UserSubscriptionsService.getPaymentDatesForSubscription(
+            subscriptions,
+            endDate,
+          );
       }
 
       return subscriptions;
@@ -102,6 +113,52 @@ export class UserSubscriptionsService {
         'Erreur lors de la récupération des souscriptions mensuelles',
       );
     }
+  }
+
+
+  // TODO : REFACTOR , SPLIT LOGIC
+  /*
+  Return subscriptions with an array of nextPaiements
+  */
+  static getPaymentDatesForSubscription(
+    userSubscriptions: UserSubscriptions[],
+    endDate: Date,
+  ) {
+    const filteredUserSubscription = userSubscriptions.map((subscription) => {
+      const billingCyle: BillingCycle = subscription.billingCycle;
+      const startDate = subscription.startDate;
+      const targetMonth = dayjs(startDate).month();
+      const targetYear = dayjs(startDate).year();
+
+      const mapBillingCycle: Record<BillingCycle,  dayjs.ManipulateType> = {
+        [BillingCycle.WEEKLY]: 'week',
+        [BillingCycle.MONTHLY]: 'month',
+        [BillingCycle.YEARLY]: 'year',
+      } as const;
+
+      const result = [];
+      let currentDate = dayjs(startDate);
+      while (currentDate.isBefore(dayjs(endDate))) {
+        // check if date payement is in the targeted month
+        if (UserSubscriptionsService.isInTargetPeriod(currentDate,targetMonth,targetYear)) {
+          result.push(currentDate);
+        }
+       const unit= mapBillingCycle[billingCyle]
+        currentDate = currentDate.add(1, unit);
+      }
+      return { ...subscription, nextsPayements: result };
+    });
+
+    return filteredUserSubscription;
+  }
+
+
+  private static isInTargetPeriod(
+    date: dayjs.Dayjs,
+    targetMonth: number,
+    targetYear: number,
+  ): boolean {
+    return date.month() === targetMonth && date.year() === targetYear;
   }
 
   findOne(id: number) {

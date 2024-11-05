@@ -51,7 +51,10 @@ export class UserSubscriptionsController {
     const userId: number = req?.user?.sub;
     if (!userId) throw new UnauthorizedException('Cannot retreive user');
 
-    return this.userSubscriptionsService.findByMonth(date, userId);
+    return this.userSubscriptionsService.findActiveSubscriptionByMonth(
+      date,
+      userId,
+    );
   }
 
   @Get(':id')

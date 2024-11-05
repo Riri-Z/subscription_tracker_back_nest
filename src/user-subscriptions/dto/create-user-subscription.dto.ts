@@ -19,11 +19,10 @@ export class CreateUserSubscriptionDto {
   @IsNotEmpty()
   startDate: Date;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  endDate: Date;
+  @ApiProperty({ required: false })
+  endDate?: Date;
 
-  renewalDate?: Date;
+  renewalDate?: Date; //should be compute by the API  with the startDate and billingCycle
 
   @IsNotEmpty()
   amount: number;

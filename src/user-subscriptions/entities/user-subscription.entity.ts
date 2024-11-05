@@ -20,7 +20,7 @@ export class UserSubscriptions {
   @Column()
   startDate: Date;
 
-  @Column()
+  @Column({ nullable: true })
   endDate: Date;
 
   @Column({ nullable: true })
