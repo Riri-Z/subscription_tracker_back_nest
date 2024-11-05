@@ -5,8 +5,7 @@ import { StatusSubscription } from 'src/users/enums/statusSubscription';
 
 export class CreateUserSubscriptionDto {
   @ApiProperty()
-  @IsNotEmpty()
-  userId: number;
+  userId?: number;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -24,8 +23,7 @@ export class CreateUserSubscriptionDto {
   @IsNotEmpty()
   endDate: Date;
 
-  @IsNotEmpty()
-  renewalDate: Date;
+  renewalDate?: Date;
 
   @IsNotEmpty()
   amount: number;
@@ -34,7 +32,6 @@ export class CreateUserSubscriptionDto {
   @IsNotEmpty()
   billingCycle: BillingCycle;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  status: StatusSubscription;
+  @ApiProperty({ enum: StatusSubscription, isArray: false })
+  status?: StatusSubscription;
 }

@@ -10,6 +10,7 @@ import { UserSubscriptions } from './entities/user-subscription.entity';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
+import { StatusSubscription } from 'src/users/enums/statusSubscription';
 
 @Injectable()
 export class UserSubscriptionsService {
@@ -21,16 +22,21 @@ export class UserSubscriptionsService {
 
   async create(createUserSubscriptionDto: CreateUserSubscriptionDto) {
     try {
+      // Check if  subscription exist
       const subscription = await this.subscriptionsService.findByName(
         createUserSubscriptionDto.subscriptionName,
       );
 
       const subscriptionId = subscription
         ? subscription.id
-        : await this.subscriptionsService
+        : //create subscription if it doesn't exist
+          await this.subscriptionsService
             .create({
               name: createUserSubscriptionDto.subscriptionName,
-              category: createUserSubscriptionDto?.subscriptionCategory,
+              // TODO : find a way to categorize subscription
+              category:
+                createUserSubscriptionDto?.subscriptionCategory,
+              // TODO : find a way to set one by default if possible
               icon_name: createUserSubscriptionDto?.icon_name,
             })
             .then((res) => res.id);
@@ -45,11 +51,13 @@ export class UserSubscriptionsService {
           renewalDate: createUserSubscriptionDto.renewalDate,
           amount: createUserSubscriptionDto.amount,
           billingCycle: createUserSubscriptionDto.billingCycle,
-          status: createUserSubscriptionDto.status,
+          status:
+            createUserSubscriptionDto.status ?? StatusSubscription['ACTIVE'],
         });
 
       return createdUserSubscription;
     } catch (error) {
+      console.log(error);
       if (error instanceof ConflictException) {
         throw error;
       }

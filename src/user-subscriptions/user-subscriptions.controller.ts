@@ -8,8 +8,8 @@ import {
   Delete,
   UseGuards,
   Request,
-  HttpException,
-  HttpStatus,
+  Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserSubscriptionsService } from './user-subscriptions.service';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
@@ -26,8 +26,13 @@ export class UserSubscriptionsController {
 
   @ApiBearerAuth('jwt')
   @Post()
-  create(@Body() createUserSubscriptionDto: CreateUserSubscriptionDto) {
-    //check if userId is the same as in jwt
+  create(
+    @Req() req,
+    @Body() createUserSubscriptionDto: CreateUserSubscriptionDto,
+  ) {
+    const userId = req?.user?.sub;
+    if (!userId) throw new UnauthorizedException('Cannot retreive user');
+    createUserSubscriptionDto.userId = userId;
     return this.userSubscriptionsService.create(createUserSubscriptionDto);
   }
 
@@ -35,12 +40,8 @@ export class UserSubscriptionsController {
   @Get()
   findAll(@Request() req) {
     const userId: number = req?.user?.sub;
-    if (!userId) {
-      throw new HttpException(
-        "Impossible de récupérer l'utilisateur",
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
+    if (!userId) throw new UnauthorizedException('Cannot retreive user');
+
     return this.userSubscriptionsService.findAll(userId);
   }
 
@@ -48,12 +49,8 @@ export class UserSubscriptionsController {
   @Get(':date') //expected date format => (utc, eg: 2024-09-24T21:35:25.701Z or "YYYY-MMM", eg: 2024-09)
   findSubscriptionsByMonth(@Request() req, @Param('date') date: string) {
     const userId: number = req?.user?.sub;
-    if (!userId) {
-      throw new HttpException(
-        "Impossible de récupérer l'utilisateur",
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
+    if (!userId) throw new UnauthorizedException('Cannot retreive user');
+
     return this.userSubscriptionsService.findByMonth(date, userId);
   }
 

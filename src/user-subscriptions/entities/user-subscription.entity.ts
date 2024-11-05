@@ -1,9 +1,4 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { BillingCycle } from '../../users/enums/billingCycle';
 import { StatusSubscription } from '../../users/enums/statusSubscription';
 import { Subscription } from 'src/subscriptions/entities/subscription.entity';
