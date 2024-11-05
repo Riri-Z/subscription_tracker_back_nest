@@ -46,7 +46,6 @@ export class AuthService {
   }
 
   async logout(user: JwtPayload): Promise<string> {
-    console.log('log out user : ', user);
     return 'User  has been log out';
   }
 

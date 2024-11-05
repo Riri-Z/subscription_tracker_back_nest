@@ -17,13 +17,13 @@ import { UpdateUserSubscriptionDto } from './dto/update-user-subscription.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
+@UseGuards(JwtAuthGuard)
 @Controller('user-subscriptions')
 export class UserSubscriptionsController {
   constructor(
     private readonly userSubscriptionsService: UserSubscriptionsService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('jwt')
   @Post()
   create(@Body() createUserSubscriptionDto: CreateUserSubscriptionDto) {
@@ -31,7 +31,6 @@ export class UserSubscriptionsController {
     return this.userSubscriptionsService.create(createUserSubscriptionDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('jwt')
   @Get()
   findAll(@Request() req) {
@@ -45,7 +44,6 @@ export class UserSubscriptionsController {
     return this.userSubscriptionsService.findAll(userId);
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('jwt')
   @Get(':date') //expected date format => (utc, eg: 2024-09-24T21:35:25.701Z or "YYYY-MMM", eg: 2024-09)
   findSubscriptionsByMonth(@Request() req, @Param('date') date: string) {

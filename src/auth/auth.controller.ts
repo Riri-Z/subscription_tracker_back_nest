@@ -1,5 +1,5 @@
 import { AuthService } from './auth.service';
-import { Controller, Post, Request, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { LocalAuthGuard } from './local-auth.guard';
 import {
   ApiBasicAuth,
@@ -9,15 +9,11 @@ import {
 } from '@nestjs/swagger';
 import { Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { ApiResponseService } from 'src/shared/api-response/api-response.service';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Controller('auth/')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly apiResponseService: ApiResponseService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
   @ApiBasicAuth()
@@ -59,7 +55,7 @@ export class AuthController {
           secure: true,
         })
 
-        .send('Welcome');
+        .send({ accessToken, refreshToken });
     } catch (error) {
       console.error(error);
       throw error;
@@ -84,5 +80,12 @@ export class AuthController {
     return res.status(200).json({
       details: result,
     });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('jwt')
+  @Get('session')
+  async session(@Request() req) {
+    return { message: 'Authenticated', user: req.user };
   }
 }
