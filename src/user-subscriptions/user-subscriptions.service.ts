@@ -5,11 +5,11 @@ import {
 } from '@nestjs/common';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
 import { UpdateUserSubscriptionDto } from './dto/update-user-subscription.dto';
-import { Between, LessThan, Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { UserSubscriptions } from './entities/user-subscription.entity';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { StatusSubscription } from 'src/users/enums/statusSubscription';
 import { BillingCycle } from 'src/users/enums/billingCycle';
 
@@ -20,6 +20,12 @@ export class UserSubscriptionsService {
     private readonly userSubscriptionRepository: Repository<UserSubscriptions>,
     private readonly subscriptionsService: SubscriptionsService,
   ) {}
+
+  BILLING_CYCLE_TO_UNIT_DAY_JS: Record<BillingCycle, dayjs.ManipulateType> = {
+    [BillingCycle.WEEKLY]: 'week',
+    [BillingCycle.MONTHLY]: 'month',
+    [BillingCycle.YEARLY]: 'year',
+  } as const;
 
   async create(createUserSubscriptionDto: CreateUserSubscriptionDto) {
     try {
@@ -79,7 +85,6 @@ export class UserSubscriptionsService {
 
   async findActiveSubscriptionByMonth(date: string, userId: number) {
     try {
-
       const endDate: Date = dayjs(date).endOf('month').toDate();
 
       let subscriptions = await this.userSubscriptionRepository.find({
@@ -96,11 +101,10 @@ export class UserSubscriptionsService {
           `No subscriptions found for the following userID and date :  ${userId},   ${date}`,
         );
       } else {
-        subscriptions =
-          UserSubscriptionsService.getPaymentDatesForSubscription(
-            subscriptions,
-            endDate,
-          );
+        subscriptions = this.getPaymentDatesForSubscription(
+          subscriptions,
+          endDate,
+        );
       }
 
       return subscriptions;
@@ -115,45 +119,52 @@ export class UserSubscriptionsService {
     }
   }
 
-
-  // TODO : REFACTOR , SPLIT LOGIC
-  /*
-  Return subscriptions with an array of nextPaiements
-  */
-  static getPaymentDatesForSubscription(
+  getPaymentDatesForSubscription(
     userSubscriptions: UserSubscriptions[],
-    endDate: Date,
+    targetDate: Date,
   ) {
     const filteredUserSubscription = userSubscriptions.map((subscription) => {
-      const billingCyle: BillingCycle = subscription.billingCycle;
-      const startDate = subscription.startDate;
-      const targetMonth = dayjs(startDate).month();
-      const targetYear = dayjs(startDate).year();
+      const upcomingPaymentForecasts = this.generateUpcominPaymentDates(
+        subscription.startDate,
+        targetDate,
+        subscription.billingCycle,
+      );
 
-      const mapBillingCycle: Record<BillingCycle,  dayjs.ManipulateType> = {
-        [BillingCycle.WEEKLY]: 'week',
-        [BillingCycle.MONTHLY]: 'month',
-        [BillingCycle.YEARLY]: 'year',
-      } as const;
-
-      const result = [];
-      let currentDate = dayjs(startDate);
-      while (currentDate.isBefore(dayjs(endDate))) {
-        // check if date payement is in the targeted month
-        if (UserSubscriptionsService.isInTargetPeriod(currentDate,targetMonth,targetYear)) {
-          result.push(currentDate);
-        }
-       const unit= mapBillingCycle[billingCyle]
-        currentDate = currentDate.add(1, unit);
-      }
-      return { ...subscription, nextsPayements: result };
+      return { ...subscription, nextsPayements: upcomingPaymentForecasts };
     });
 
     return filteredUserSubscription;
   }
 
+  generateUpcominPaymentDates(
+    startDate: Date,
+    targetDate: Date,
+    billingCycle: BillingCycle,
+  ) {
+    const targetMonth = dayjs(targetDate).month();
+    const targetYear = dayjs(targetDate).year();
+    const paymentDates: dayjs.Dayjs[] = [];
+    let currentDate = dayjs(startDate);
 
-  private static isInTargetPeriod(
+    while (currentDate.isBefore(dayjs(targetDate))) {
+      // check if date payement is in the targeted month
+      if (this.isInTargetPeriod(currentDate, targetMonth, targetYear)) {
+        paymentDates.push(currentDate);
+      }
+      currentDate = this.getNextPaymentDate(billingCycle, currentDate);
+      // currentDate = currentDate.add(1, unit);
+    }
+
+    return paymentDates;
+  }
+
+  getNextPaymentDate(billingCycle: BillingCycle, currentDate: Dayjs) {
+    const unit = this.BILLING_CYCLE_TO_UNIT_DAY_JS[billingCycle];
+
+    return currentDate.add(1, unit);
+  }
+
+  isInTargetPeriod(
     date: dayjs.Dayjs,
     targetMonth: number,
     targetYear: number,
