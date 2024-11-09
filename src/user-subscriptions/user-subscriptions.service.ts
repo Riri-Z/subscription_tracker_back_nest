@@ -47,6 +47,8 @@ export class UserSubscriptionsService {
             })
             .then((res) => res.id);
 
+      // Do we need to allow one type of subscription per user ?
+      // eg : one netflix subscription , one amazon subscription
       const createdUserSubscription =
         await this.userSubscriptionRepository.save({
           userId: createUserSubscriptionDto.userId,

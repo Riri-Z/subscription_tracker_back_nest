@@ -10,30 +10,38 @@ import {
   Request,
   Req,
   UnauthorizedException,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserSubscriptionsService } from './user-subscriptions.service';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
 import { UpdateUserSubscriptionDto } from './dto/update-user-subscription.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiResponseService } from 'src/shared/api-response/api-response.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('user-subscriptions')
 export class UserSubscriptionsController {
   constructor(
     private readonly userSubscriptionsService: UserSubscriptionsService,
+    private readonly apiResponseService: ApiResponseService,
   ) {}
 
   @ApiBearerAuth('jwt')
   @Post()
-  create(
+  async create(
     @Req() req,
     @Body() createUserSubscriptionDto: CreateUserSubscriptionDto,
   ) {
     const userId = req?.user?.sub;
     if (!userId) throw new UnauthorizedException('Cannot retreive user');
     createUserSubscriptionDto.userId = userId;
-    return this.userSubscriptionsService.create(createUserSubscriptionDto);
+    const newUserSubscription = await this.userSubscriptionsService.create(
+      createUserSubscriptionDto,
+    );
+    return this.apiResponseService.apiResponse(HttpStatus.CREATED, {
+      userId: newUserSubscription.userId,
+    });
   }
 
   @ApiBearerAuth('jwt')
