@@ -72,10 +72,10 @@ export class UserSubscriptionsController {
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateUserSubscriptionDto: UpdateUserSubscriptionDto,
   ) {
-    return this.userSubscriptionsService.update(+id, updateUserSubscriptionDto);
+    return this.userSubscriptionsService.update(id, updateUserSubscriptionDto);
   }
 
   @Delete(':id')

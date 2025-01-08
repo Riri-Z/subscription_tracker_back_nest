@@ -179,6 +179,7 @@ export class UserSubscriptionsService {
   }
 
   update(id: number, updateUserSubscriptionDto: UpdateUserSubscriptionDto) {
+    /* TODO : complete this service */
     return `This action updates a #${id} userSubscription with the following values : ${JSON.stringify(updateUserSubscriptionDto)}`;
   }
 
