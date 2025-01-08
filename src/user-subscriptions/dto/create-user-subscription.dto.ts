@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 import { BillingCycle } from 'src/users/enums/billingCycle';
 import { StatusSubscription } from 'src/users/enums/statusSubscription';
+import { SubscriptionCategory } from 'src/user-subscriptions/enums/subscription-categories';
 
 export class CreateUserSubscriptionDto {
   @ApiProperty()
@@ -11,7 +12,9 @@ export class CreateUserSubscriptionDto {
   @IsNotEmpty()
   subscriptionName: string;
 
-  subscriptionCategory?: string;
+  @ApiProperty({ enum: SubscriptionCategory, isArray: false })
+  @IsNotEmpty()
+  subscriptionCategory: SubscriptionCategory;
 
   icon_name?: string;
 
