@@ -36,16 +36,32 @@ export class SubscriptionsService {
     return `This action returns all subscriptions`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} subscription`;
+  async findOneById(id: number) {
+    return await this.subscriptionRepository.findOneBy({ id });
   }
 
   async findByName(name: string) {
     return await this.subscriptionRepository.findOneBy({ name });
   }
 
-  update(id: number, updateSubscriptionDto: UpdateSubscriptionDto) {
-    return `This action updates a #${id} subscription with the following values : ${JSON.stringify(updateSubscriptionDto)}`;
+  async update(id: number, updateSubscriptionDto: UpdateSubscriptionDto) {
+    try {
+      const currentSubscription = await this.subscriptionRepository.findOneBy({
+        id,
+      });
+      if (!currentSubscription) {
+        throw new ConflictException('Subscription not found');
+      }
+      return await this.subscriptionRepository.update(
+        id,
+        updateSubscriptionDto,
+      );
+    } catch (err) {
+      throw new InternalServerErrorException(
+        'Error updating subscription',
+        err,
+      );
+    }
   }
 
   remove(id: number) {

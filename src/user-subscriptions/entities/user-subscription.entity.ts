@@ -1,4 +1,12 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { BillingCycle } from '../../users/enums/billingCycle';
 import { StatusSubscription } from '../../users/enums/statusSubscription';
 import { Subscription } from 'src/subscriptions/entities/subscription.entity';
@@ -28,6 +36,15 @@ export class UserSubscriptions {
 
   @Column()
   amount: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @Column({
     type: 'enum',

@@ -7,6 +7,8 @@ import { SubscriptionCategory } from 'src/user-subscriptions/enums/subscription-
 export class CreateUserSubscriptionDto {
   @ApiProperty()
   userId?: number;
+  @ApiProperty()
+  id?: number;
 
   @ApiProperty()
   @IsNotEmpty()

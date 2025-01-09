@@ -1,3 +1,4 @@
+import { User } from './../users/entities/user.entity';
 import {
   ConflictException,
   Injectable,
@@ -5,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
 import { UpdateUserSubscriptionDto } from './dto/update-user-subscription.dto';
-import { LessThan, Repository } from 'typeorm';
+import { DataSource, LessThan, Repository } from 'typeorm';
 import { UserSubscriptions } from './entities/user-subscription.entity';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,8 +19,9 @@ export class UserSubscriptionsService {
   constructor(
     @InjectRepository(UserSubscriptions)
     private readonly userSubscriptionRepository: Repository<UserSubscriptions>,
+    private readonly dataSource: DataSource,
     private readonly subscriptionsService: SubscriptionsService,
-  ) {}
+  ) { }
 
   BILLING_CYCLE_TO_UNIT_DAY_JS: Record<BillingCycle, dayjs.ManipulateType> = {
     [BillingCycle.WEEKLY]: 'week',
@@ -37,15 +39,15 @@ export class UserSubscriptionsService {
       const subscriptionId = subscription
         ? subscription.id
         : //create subscription if it doesn't exist
-          await this.subscriptionsService
-            .create({
-              name: createUserSubscriptionDto.subscriptionName,
-              // TODO : find a way to categorize subscription
-              category: createUserSubscriptionDto?.subscriptionCategory,
-              // TODO : find a way to set one by default if possible
-              icon_name: createUserSubscriptionDto?.icon_name,
-            })
-            .then((res) => res.id);
+        await this.subscriptionsService
+          .create({
+            name: createUserSubscriptionDto.subscriptionName,
+            // TODO : find a way to categorize subscription
+            category: createUserSubscriptionDto?.subscriptionCategory,
+            // TODO : find a way to set one by default if possible
+            icon_name: createUserSubscriptionDto?.icon_name,
+          })
+          .then((res) => res.id);
 
       // Do we need to allow one type of subscription per user ?
       // eg : one netflix subscription , one amazon subscription
@@ -53,7 +55,6 @@ export class UserSubscriptionsService {
         await this.userSubscriptionRepository.save({
           userId: createUserSubscriptionDto.userId,
           subscriptionId: subscriptionId,
-          name: createUserSubscriptionDto.subscriptionName,
           startDate: createUserSubscriptionDto.startDate,
           endDate: createUserSubscriptionDto.endDate,
           renewalDate: createUserSubscriptionDto.renewalDate,
@@ -178,9 +179,65 @@ export class UserSubscriptionsService {
     return `This action returns a #${id} userSubscription`;
   }
 
-  update(id: number, updateUserSubscriptionDto: UpdateUserSubscriptionDto) {
-    /* TODO : complete this service */
-    return `This action updates a #${id} userSubscription with the following values : ${JSON.stringify(updateUserSubscriptionDto)}`;
+  async update(
+    id: number,
+    updateUserSubscriptionDto: UpdateUserSubscriptionDto,
+  ) {
+    try {
+      // Checking if  userSubscription exist
+      const oldUserSubscription =
+        await this.userSubscriptionRepository.findOneBy({ id });
+
+      if (!oldUserSubscription) {
+        throw new ConflictException(
+          ' userSubscription not found with the given ID: ' + id,
+        );
+      }
+
+      // TODO : check if newUserSubscription is complete. if not throw an error
+      const newUserSubscription = {
+        id: updateUserSubscriptionDto.id,
+        userId: updateUserSubscriptionDto.userId,
+        subscriptionId: updateUserSubscriptionDto.subscription.id,
+        startDate: updateUserSubscriptionDto.startDate,
+        endDate: updateUserSubscriptionDto.endDate,
+        renewalDate: updateUserSubscriptionDto.renewalDate,
+        amount: updateUserSubscriptionDto.amount,
+        billingCycle: updateUserSubscriptionDto.billingCycle,
+        status:
+          updateUserSubscriptionDto.status ?? StatusSubscription['ACTIVE'],
+      };
+
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      try {
+        await this.subscriptionsService.update(
+          newUserSubscription.subscriptionId,
+          {
+            name: updateUserSubscriptionDto.subscriptionName,
+            category: updateUserSubscriptionDto.subscription.category,
+            icon_name: updateUserSubscriptionDto.subscription.icon_name,
+          },
+        ); // TODO :  UPDATE THIS SERVICE, it's  a mock for now
+
+        await this.userSubscriptionRepository.update(id, newUserSubscription);
+      } catch (err) {
+        console.log('error updating user-sub', err);
+        // since we have errors lets rollback the changes we made
+        await queryRunner.rollbackTransaction();
+      } finally {
+        // you need to release a queryRunner which was manually instantiated
+        await queryRunner.release();
+      }
+
+      return `Updated successfully user-subscription`;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error updating user-subscription',
+        { cause: error },
+      );
+    }
   }
 
   remove(id: number) {
