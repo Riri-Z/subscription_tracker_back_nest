@@ -1,4 +1,3 @@
-import { User } from './../users/entities/user.entity';
 import {
   ConflictException,
   Injectable,
@@ -100,7 +99,7 @@ export class UserSubscriptionsService {
       });
 
       if (subscriptions.length === 0) {
-        console.log(
+        console.info(
           `No subscriptions found for the following userID and date :  ${userId},   ${date}`,
         );
       } else {
@@ -126,12 +125,14 @@ export class UserSubscriptionsService {
     userSubscriptions: UserSubscriptions[],
     targetDate: Date,
   ) {
+    targetDate = dayjs(targetDate).add(1, 'month').toDate();
     const subscriptionWithPaymentForecasts = userSubscriptions.map(
       (subscription) => {
         const upcomingPaymentForecasts = this.generateUpcominPaymentDates(
           subscription.startDate,
           targetDate,
           subscription.billingCycle,
+          subscription.startDate,
         );
 
         return { ...subscription, nextsPayements: upcomingPaymentForecasts };
@@ -147,36 +148,56 @@ export class UserSubscriptionsService {
     startDate: Date,
     targetDate: Date,
     billingCycle: BillingCycle,
+    startDateSubscription: Date,
   ) {
-    const targetMonth = dayjs(targetDate).month();
-    const targetYear = dayjs(targetDate).year();
     const paymentDates: dayjs.Dayjs[] = [];
-    let currentDate = dayjs(startDate);
+    let currentDate = dayjs(startDate).subtract(1, 'month');
 
     while (currentDate.isBefore(dayjs(targetDate))) {
       // check if date payement is in the targeted month
-      if (this.isInTargetPeriod(currentDate, targetMonth, targetYear)) {
+      if (this.isInTargetPeriod(currentDate, targetDate, startDate)) {
         paymentDates.push(currentDate);
       }
-      currentDate = this.getNextPaymentDate(billingCycle, currentDate);
-      // currentDate = currentDate.add(1, unit);
+      currentDate = this.getNextPaymentDate(
+        billingCycle,
+        currentDate,
+        startDateSubscription,
+      );
     }
 
     return paymentDates;
   }
 
-  getNextPaymentDate(billingCycle: BillingCycle, currentDate: Dayjs) {
+  getNextPaymentDate(
+    billingCycle: BillingCycle,
+    currentDate: Dayjs,
+    startDateSubscription: Date,
+  ) {
     const unit = this.BILLING_CYCLE_TO_UNIT_DAY_JS[billingCycle];
-
-    return currentDate.add(1, unit);
+    // NextDate previsional
+    const nextMonth = currentDate.add(1, unit);
+    const startOriginalDayDate = dayjs(startDateSubscription).get('date');
+    if (startOriginalDayDate !== nextMonth.get('date')) {
+      if (startOriginalDayDate > currentDate.get('date')) {
+        // In case the end of next month is more than the nextPaiementDate from previous month eg : 31/01/2025 -> 28/02/2025
+        return nextMonth.set('date', startOriginalDayDate);
+      } else {
+        // In case the end of next month is less than the start date of the subscription eg : 31/01/2025 -> 28/02/2025
+        return nextMonth.set('date', nextMonth.endOf('month').get('date'));
+      }
+    }
+    return nextMonth;
   }
 
   isInTargetPeriod(
     date: dayjs.Dayjs,
-    targetMonth: number,
-    targetYear: number,
+    targetDate: Date,
+    startDateSubscription: Date,
   ): boolean {
-    return date.month() === targetMonth && date.year() === targetYear;
+    return (
+      !dayjs(startDateSubscription).isAfter(date) &&
+      date.isBefore(dayjs(targetDate))
+    );
   }
 
   findOne(id: number) {
