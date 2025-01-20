@@ -85,6 +85,12 @@ export class UserSubscriptionsService {
     });
   }
 
+  /**
+   * Get active subscription for a given month
+   * @param date start of the month
+   * @param userId
+   * @returns userSubscriptions[]
+   */
   async findActiveSubscriptionByMonth(date: string, userId: number) {
     try {
       const endDate: Date = dayjs(date).endOf('month').toDate();
@@ -121,6 +127,9 @@ export class UserSubscriptionsService {
     }
   }
 
+  /**
+   * Get the current and next payment dates for a given subscription
+   */
   getPaymentDatesForSubscription(
     userSubscriptions: UserSubscriptions[],
     targetDate: Date,
@@ -144,6 +153,14 @@ export class UserSubscriptionsService {
     );
   }
 
+  /**
+   * Generate payment dates
+   * @param startDate start of month
+   * @param targetDate end of next month
+   * @param billingCycle
+   * @param startDateSubscription
+   * @returns
+   */
   generateUpcominPaymentDates(
     startDate: Date,
     targetDate: Date,
@@ -151,7 +168,7 @@ export class UserSubscriptionsService {
     startDateSubscription: Date,
   ) {
     const paymentDates: dayjs.Dayjs[] = [];
-    let currentDate = dayjs(startDate).subtract(1, 'month');
+    let currentDate = dayjs(startDate);
 
     while (currentDate.isBefore(dayjs(targetDate))) {
       // check if date payement is in the targeted month
@@ -174,23 +191,40 @@ export class UserSubscriptionsService {
     startDateSubscription: Date,
   ) {
     const unit = this.BILLING_CYCLE_TO_UNIT_DAY_JS[billingCycle];
+
     // NextDate previsional
-    const nextMonth = currentDate.add(1, unit);
+    const nextIteration = currentDate.add(1, unit);
     const startOriginalDayDate = dayjs(startDateSubscription).get('date');
-    if (startOriginalDayDate !== nextMonth.get('date')) {
-      if (startOriginalDayDate > currentDate.get('date')) {
-        // In case the end of next month is more than the nextPaiementDate from previous month eg : 31/01/2025 -> 28/02/2025
-        return nextMonth.set('date', startOriginalDayDate);
-      } else {
-        // In case the end of next month is less than the start date of the subscription eg : 31/01/2025 -> 28/02/2025
-        return nextMonth.set('date', nextMonth.endOf('month').get('date'));
+
+    if (billingCycle === BillingCycle.WEEKLY) {
+      // handle weekly billing cycle
+    }
+
+    if (billingCycle === BillingCycle.MONTHLY) {
+      // handle monthly billing cycle
+      if (startOriginalDayDate !== nextIteration.get('date')) {
+        if (startOriginalDayDate > currentDate.get('date')) {
+          // In case the end of next month is more than the nextPaiementDate from previous month eg : 31/01/2025 -> 28/02/2025
+          return nextIteration.set('date', startOriginalDayDate);
+        } else {
+          // In case the end of next month is less than the start date of the subscription eg : 31/01/2025 -> 28/02/2025
+          return nextIteration.set(
+            'date',
+            nextIteration.endOf('month').get('date'),
+          );
+        }
       }
     }
-    return nextMonth;
+
+    if (billingCycle === BillingCycle.YEARLY) {
+      //handle yearly billing cycle
+    }
+
+    return nextIteration;
   }
 
   isInTargetPeriod(
-    date: dayjs.Dayjs,
+    date: Dayjs,
     targetDate: Date,
     startDateSubscription: Date,
   ): boolean {
