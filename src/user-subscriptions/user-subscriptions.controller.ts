@@ -79,7 +79,11 @@ export class UserSubscriptionsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userSubscriptionsService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const result = await this.userSubscriptionsService.remove(+id);
+    if (!result.affected) {
+      return this.apiResponseService.apiResponse(HttpStatus.NOT_FOUND);
+    }
+    return this.apiResponseService.apiResponse(HttpStatus.NO_CONTENT);
   }
 }

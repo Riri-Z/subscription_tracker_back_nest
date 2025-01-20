@@ -287,7 +287,7 @@ export class UserSubscriptionsService {
         await queryRunner.rollbackTransaction();
       } finally {
         // you need to release a queryRunner which was manually instantiated
-        await queryRunner.release();
+          await queryRunner.release();
       }
 
       return `Updated successfully user-subscription`;
@@ -299,7 +299,14 @@ export class UserSubscriptionsService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} userSubscription`;
+  async remove(id: number) {
+    try {
+      return await this.userSubscriptionRepository.delete({ id });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error deleting user-subscription id: ' + id,
+        { cause: error },
+      );
+    }
   }
 }
