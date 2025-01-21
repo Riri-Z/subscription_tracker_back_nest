@@ -21,7 +21,7 @@ export class SubscriptionsService {
       return await this.subscriptionRepository.save(createSubscriptionDto);
     } catch (error) {
       if (error.code === '23505') {
-        throw new ConflictException('this category already exists');
+        throw new ConflictException('this name already exists');
       }
       throw new InternalServerErrorException(
         'Error creating new subscription',

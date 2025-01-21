@@ -16,7 +16,7 @@ export class CreateUserSubscriptionDto {
 
   @ApiProperty({ enum: SubscriptionCategory, isArray: false })
   @IsNotEmpty()
-  subscriptionCategory: SubscriptionCategory;
+  category: SubscriptionCategory;
 
   icon_name?: string;
 

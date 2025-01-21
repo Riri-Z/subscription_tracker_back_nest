@@ -14,9 +14,6 @@ export class Subscription {
   @Column({ nullable: true })
   icon_name: string;
 
-  @Column({ nullable: true })
-  category: string;
-
   @OneToMany(
     () => UserSubscriptions,
     (userSubscriptions) => userSubscriptions.user,

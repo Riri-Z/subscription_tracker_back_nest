@@ -9,6 +9,5 @@ export class UpdateUserSubscriptionDto extends PartialType(
     id: number;
     name: string;
     icon_name?: string;
-    category: string;
   };
 }

@@ -37,6 +37,9 @@ export class UserSubscriptions {
   @Column()
   amount: number;
 
+  @Column({ nullable: true })
+  category: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

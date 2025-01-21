@@ -41,8 +41,6 @@ export class UserSubscriptionsService {
           await this.subscriptionsService
             .create({
               name: createUserSubscriptionDto.subscriptionName,
-              // TODO : find a way to categorize subscription
-              category: createUserSubscriptionDto?.subscriptionCategory,
               // TODO : find a way to set one by default if possible
               icon_name: createUserSubscriptionDto?.icon_name,
             })
@@ -262,6 +260,7 @@ export class UserSubscriptionsService {
         endDate: updateUserSubscriptionDto.endDate,
         renewalDate: updateUserSubscriptionDto.renewalDate,
         amount: updateUserSubscriptionDto.amount,
+        category: updateUserSubscriptionDto.category,
         billingCycle: updateUserSubscriptionDto.billingCycle,
         status:
           updateUserSubscriptionDto.status ?? StatusSubscription['ACTIVE'],
@@ -275,10 +274,9 @@ export class UserSubscriptionsService {
           newUserSubscription.subscriptionId,
           {
             name: updateUserSubscriptionDto.subscriptionName,
-            category: updateUserSubscriptionDto.subscription.category,
             icon_name: updateUserSubscriptionDto.subscription.icon_name,
           },
-        ); // TODO :  UPDATE THIS SERVICE, it's  a mock for now
+        );
 
         await this.userSubscriptionRepository.update(id, newUserSubscription);
       } catch (err) {
@@ -287,7 +285,7 @@ export class UserSubscriptionsService {
         await queryRunner.rollbackTransaction();
       } finally {
         // you need to release a queryRunner which was manually instantiated
-          await queryRunner.release();
+        await queryRunner.release();
       }
 
       return `Updated successfully user-subscription`;

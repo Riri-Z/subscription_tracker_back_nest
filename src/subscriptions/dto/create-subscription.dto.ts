@@ -9,7 +9,4 @@ export class CreateSubscriptionDto {
 
   @ApiProperty({ required: false })
   icon_name?: string;
-
-  @ApiProperty({ required: false })
-  category?: string;
 }
