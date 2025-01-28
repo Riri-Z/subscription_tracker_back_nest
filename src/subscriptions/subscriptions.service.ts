@@ -7,14 +7,14 @@ import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Subscription } from './entities/subscription.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
     @InjectRepository(Subscription)
     private readonly subscriptionRepository: Repository<Subscription>,
-  ) {}
+  ) { }
 
   async create(createSubscriptionDto: CreateSubscriptionDto) {
     try {
@@ -34,6 +34,15 @@ export class SubscriptionsService {
 
   findAll() {
     return `This action returns all subscriptions`;
+  }
+  async findAllWithIcons() {
+    const result = await this.subscriptionRepository.find({
+      where: {
+        icon_url: Not(IsNull())
+      }
+    })
+
+    return result;
   }
 
   async findOneById(id: number) {
@@ -78,13 +87,15 @@ export class SubscriptionsService {
     if (subscription?.name) {
       // TODO : Maybe use cache to prevent  multiple  call http
       const isIconExistOnCloud = await this.verifySubscriptionIconUrl(
-        subscription.name,
+        subscription.name.toLowerCase(),
       );
       if (!isIconExistOnCloud.ok) {
         subscription.icon_url = null;
       } else {
         subscription.icon_url =
           process.env.CDN_ICONS_BASE + '/' + subscription.name + '.svg';
+        // save icon url in database
+        await this.update(subscription.id, subscription)
       }
       return subscription;
     } else {
