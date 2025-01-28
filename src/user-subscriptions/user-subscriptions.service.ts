@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -91,9 +92,13 @@ export class UserSubscriptionsService {
    */
   async findActiveSubscriptionByMonth(date: string, userId: number) {
     try {
-      const endDate: Date = dayjs(date).endOf('month').toDate();
-
-      let subscriptions = await this.userSubscriptionRepository.find({
+      const endDate: Date = dayjs(date).isValid()
+        ? dayjs(date).endOf('month').toDate()
+        : null;
+      if (!endDate) {
+        throw new BadRequestException('Invalid date format');
+      }
+      let userSubscriptions = await this.userSubscriptionRepository.find({
         relations: { subscription: true },
         where: {
           userId,
@@ -102,18 +107,14 @@ export class UserSubscriptionsService {
         },
       });
 
-      if (subscriptions.length === 0) {
+      if (userSubscriptions.length === 0) {
         console.info(
-          `No subscriptions found for the following userID and date :  ${userId},   ${date}`,
+          `No userSubscriptions found for the following userID and date :  ${userId},   ${date}`,
         );
+        return [];
       } else {
-        subscriptions = this.getPaymentDatesForSubscription(
-          subscriptions,
-          endDate,
-        );
+        return this.processUserSubscriptions(userSubscriptions, endDate);
       }
-
-      return subscriptions;
     } catch (error) {
       console.error(
         `Erreur lors de la recherche des souscriptions: ${error.message}`,
@@ -123,6 +124,38 @@ export class UserSubscriptionsService {
         'Erreur lors de la récupération des souscriptions mensuelles',
       );
     }
+  }
+
+  /**
+   * Populate userSubscriptions with their payement's forecast and their subscription's icon url
+   * @param userSubscriptions: UserSubscriptions[]
+   * @param endDate : Date
+   * @returns
+   */
+  async processUserSubscriptions(
+    userSubscriptions: UserSubscriptions[],
+    endDate: Date,
+  ) {
+    const userSubscriptionsWithIcons = await Promise.all(
+      userSubscriptions.map(async (userSubscriptions: UserSubscriptions) => {
+        try {
+          userSubscriptions.subscription =
+            await this.subscriptionsService.generateIconUrl(
+              userSubscriptions.subscription,
+            );
+        } catch (error) {
+          console.error(
+            `error generating icon URL for subscription : ${error.message}`,
+          );
+          userSubscriptions.subscription.icon_url = null; // Fallback to null in case of error
+        }
+        return userSubscriptions;
+      }),
+    );
+    return this.getPaymentDatesForSubscription(
+      userSubscriptionsWithIcons,
+      endDate,
+    );
   }
 
   /**

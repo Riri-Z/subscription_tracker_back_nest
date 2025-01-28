@@ -67,4 +67,45 @@ export class SubscriptionsService {
   remove(id: number) {
     return `This action removes a #${id} subscription`;
   }
+
+  /**
+   * Generate icon_url property based on subscription.name.
+   * It call verifySubscriptionIconUrl method, and set the right url for icon_url property
+   * @param subscription Subscription
+   * @returns Subscription
+   */
+  async generateIconUrl(subscription: Subscription) {
+    if (subscription?.name) {
+      // TODO : Maybe use cache to prevent  multiple  call http
+      const isIconExistOnCloud = await this.verifySubscriptionIconUrl(
+        subscription.name,
+      );
+      if (!isIconExistOnCloud.ok) {
+        subscription.icon_url = null;
+      } else {
+        subscription.icon_url =
+          process.env.CDN_ICONS_BASE + '/' + subscription.name + '.svg';
+      }
+      return subscription;
+    } else {
+      return subscription;
+    }
+  }
+
+  /**
+   * This methode aims to check icon avalibility on CDN for a given  name
+   * @param nameSubscription
+   * @returns Response with status code 200 or 404
+   */
+  async verifySubscriptionIconUrl(nameSubscription: string) {
+    try {
+      const response = await fetch(
+        process.env.CDN_ICONS_BASE + '/' + nameSubscription + '.svg',
+      );
+      return { ok: response.ok };
+    } catch (error) {
+      console.error(`Error verifying subscription icon URL: ${error.message}`);
+      return { ok: false };
+    }
+  }
 }
