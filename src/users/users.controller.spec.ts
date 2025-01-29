@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { ApiResponseService } from 'src/shared/api-response/api-response.service';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -83,6 +84,7 @@ describe('UsersController', () => {
           provide: UsersService,
           useValue: mockUserService,
         },
+        ApiResponseService,
       ],
     }).compile();
 
@@ -94,35 +96,38 @@ describe('UsersController', () => {
   });
 
   it('/get users', async () => {
-    const result = [
-      {
-        id: 31,
-        email: 'pzqodpqzodpzq@gmail.com',
-        name: 'pzqodpqzodpzq',
-        username: 'pzqodpqzodpzq',
-        roles: ['ADMIN'],
-        createdAt: '2024-09-20T06:49:54.013Z',
-        updatedAt: '2024-09-20T06:49:54.013Z',
-      },
-      {
-        id: 32,
-        email: 'testtest@gmail.com',
-        name: 'testtest',
-        username: 'testtest',
-        roles: ['ADMIN'],
-        createdAt: '2024-09-20T07:28:06.465Z',
-        updatedAt: '2024-09-20T07:28:06.465Z',
-      },
-      {
-        id: 33,
-        email: 'xxx@gmail.com',
-        name: 'xxx',
-        username: 'xxx',
-        roles: ['USER'],
-        createdAt: '2024-09-23T06:49:56.388Z',
-        updatedAt: '2024-09-23T06:49:56.388Z',
-      },
-    ];
+    const result = {
+      body: [
+        {
+          createdAt: '2024-09-20T06:49:54.013Z',
+          email: 'pzqodpqzodpzq@gmail.com',
+          id: 31,
+          name: 'pzqodpqzodpzq',
+          roles: ['ADMIN'],
+          updatedAt: '2024-09-20T06:49:54.013Z',
+          username: 'pzqodpqzodpzq',
+        },
+        {
+          createdAt: '2024-09-20T07:28:06.465Z',
+          email: 'testtest@gmail.com',
+          id: 32,
+          name: 'testtest',
+          roles: ['ADMIN'],
+          updatedAt: '2024-09-20T07:28:06.465Z',
+          username: 'testtest',
+        },
+        {
+          createdAt: '2024-09-23T06:49:56.388Z',
+          email: 'xxx@gmail.com',
+          id: 33,
+          name: 'xxx',
+          roles: ['USER'],
+          updatedAt: '2024-09-23T06:49:56.388Z',
+          username: 'xxx',
+        },
+      ],
+      statusCode: 200,
+    };
     const serviceSpy = jest.spyOn(usersService, 'findAll');
 
     expect(await controller.findAll()).toEqual(result);
@@ -133,8 +138,11 @@ describe('UsersController', () => {
     const id = 31;
     const response = await controller.findOneById(id);
     const serviceSpy = jest.spyOn(usersService, 'findOneById');
-
-    expect(response).toEqual(mockUserService.findOneById(id));
+    const expectedResult = {
+      body: mockUserService.findOneById(id),
+      statusCode: 200,
+    };
+    expect(response).toEqual(expectedResult);
     expect(serviceSpy).toHaveBeenCalled();
     expect(serviceSpy).toHaveBeenCalledWith(id);
   });

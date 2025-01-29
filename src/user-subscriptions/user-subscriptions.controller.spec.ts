@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserSubscriptionsController } from './user-subscriptions.controller';
 import { UserSubscriptionsService } from './user-subscriptions.service';
+import { ApiResponseService } from 'src/shared/api-response/api-response.service';
 
 describe('UserSubscriptionsController', () => {
   let controller: UserSubscriptionsController;
@@ -15,6 +16,10 @@ describe('UserSubscriptionsController', () => {
         {
           provide: UserSubscriptionsService,
           useValue: mockUserSubscriptionsService,
+        },
+        {
+          provide: ApiResponseService,
+          useValue: {},
         },
       ],
     }).compile();

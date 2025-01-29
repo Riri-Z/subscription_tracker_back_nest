@@ -23,18 +23,24 @@ import { EntityNotFoundError } from 'typeorm';
 import { ResponseUserDTO } from './dto/response-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiCookieAuth } from '@nestjs/swagger';
+import { ApiResponseService } from 'src/shared/api-response/api-response.service';
+
 // TODO :  Add global error handler
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 @ApiCookieAuth()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly apiResponseService: ApiResponseService,
+  ) {}
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     try {
       const newUser = await this.usersService.create(createUserDto);
-      return ResponseUserDTO.fromEntity(newUser);
+      const body = ResponseUserDTO.fromEntity(newUser);
+      return this.apiResponseService.apiResponse(HttpStatus.CREATED, body);
     } catch (error) {
       console.error(error);
       // 23505 is a code from typeORM when there is conflict on uniqueness
@@ -56,7 +62,8 @@ export class UsersController {
   async findAll() {
     try {
       const users = await this.usersService.findAll();
-      return users.map((user) => ResponseUserDTO.fromEntity(user));
+      const body = users.map((user) => ResponseUserDTO.fromEntity(user));
+      return this.apiResponseService.apiResponse(HttpStatus.OK, body);
     } catch (error) {
       console.error(error);
       throw new InternalServerErrorException(
@@ -70,7 +77,8 @@ export class UsersController {
   async findOneById(@Param('id') id: number) {
     try {
       const user = await this.usersService.findOneById(+id);
-      return ResponseUserDTO.fromEntity(user);
+      const body = ResponseUserDTO.fromEntity(user);
+      return this.apiResponseService.apiResponse(HttpStatus.OK, body);
     } catch (error) {
       console.error(error);
       if (error instanceof EntityNotFoundError) {
@@ -92,7 +100,8 @@ export class UsersController {
   async findOneByUsername(@Param('username') username: string) {
     try {
       const user = await this.usersService.findOneByUsername(username);
-      return ResponseUserDTO.fromEntity(user);
+      const body = ResponseUserDTO.fromEntity(user);
+      return this.apiResponseService.apiResponse(HttpStatus.OK, body);
     } catch (error) {
       console.error(error);
       if (error instanceof EntityNotFoundError) {
@@ -114,7 +123,8 @@ export class UsersController {
   async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     try {
       const updatedUser = await this.usersService.update(id, updateUserDto);
-      return ResponseUserDTO.fromEntity(updatedUser);
+      const body = ResponseUserDTO.fromEntity(updatedUser);
+      return this.apiResponseService.apiResponse(HttpStatus.OK, body);
     } catch (error) {
       console.error('patch user, ', error);
       throw error;
@@ -126,9 +136,10 @@ export class UsersController {
   async remove(@Param('id') id: string) {
     try {
       await this.usersService.delete(+id);
-      return {
+      const body = {
         message: `Utilisateur avec l'id ${id} a été supprimé avec succès`,
       };
+      return this.apiResponseService.apiResponse(HttpStatus.OK, body);
     } catch (error) {
       console.error(error);
       if (error instanceof NotFoundException) {

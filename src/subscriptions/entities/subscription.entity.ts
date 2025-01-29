@@ -11,11 +11,11 @@ export class Subscription {
   @Column({ unique: true })
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   icon_name: string;
 
-  @Column({ default: 'other' })
-  category: string;
+  @Column({ nullable: true })
+  icon_url: string;
 
   @OneToMany(
     () => UserSubscriptions,

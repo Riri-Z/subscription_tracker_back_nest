@@ -2,17 +2,21 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 import { BillingCycle } from 'src/users/enums/billingCycle';
 import { StatusSubscription } from 'src/users/enums/statusSubscription';
+import { SubscriptionCategory } from 'src/user-subscriptions/enums/subscription-categories';
 
 export class CreateUserSubscriptionDto {
   @ApiProperty()
-  @IsNotEmpty()
-  userId: number;
+  userId?: number;
+  @ApiProperty()
+  id?: number;
 
   @ApiProperty()
   @IsNotEmpty()
   subscriptionName: string;
 
-  subscriptionCategory?: string;
+  @ApiProperty({ enum: SubscriptionCategory, isArray: false })
+  @IsNotEmpty()
+  category: SubscriptionCategory;
 
   icon_name?: string;
 
@@ -20,12 +24,10 @@ export class CreateUserSubscriptionDto {
   @IsNotEmpty()
   startDate: Date;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  endDate: Date;
+  @ApiProperty({ required: false })
+  endDate?: Date;
 
-  @IsNotEmpty()
-  renewalDate: Date;
+  renewalDate?: Date; //should be compute by the API  with the startDate and billingCycle
 
   @IsNotEmpty()
   amount: number;
@@ -34,7 +36,6 @@ export class CreateUserSubscriptionDto {
   @IsNotEmpty()
   billingCycle: BillingCycle;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  status: StatusSubscription;
+  @ApiProperty({ enum: StatusSubscription, isArray: false })
+  status?: StatusSubscription;
 }
