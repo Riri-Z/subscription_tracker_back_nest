@@ -1,0 +1,21 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:3001"
+    environment:
+      DATABASE_HOST:  ${DATABASE_HOST}
+      DATABASE_NAME:  ${DATABASE_NAME}
+      DATABASE_PORT:  ${DATABASE_PORT}
+      DATABASE_USER:  ${DATABASE_USER}
+      DATABASE_PASSWORD:  ${DATABASE_PASSWORD}
+      PORT: ${PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      CDN_ICONS_BASE: ${CDN_ICONS_BASE}
+    env_file:
+      - .env
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
