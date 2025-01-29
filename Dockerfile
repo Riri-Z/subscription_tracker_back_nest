@@ -1,4 +1,4 @@
-FROM node:20.15-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -12,7 +12,6 @@ COPY src/ ./src
 
 RUN npm run build
 
-# comment this for now, gcp use another port
-#EXPOSE 3001
+EXPOSE 3001
 
-CMD [ "node", "dist/main.js" ]
+CMD ["npm", "run", "start:prod", "--debug"]
