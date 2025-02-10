@@ -37,9 +37,10 @@ export class AuthController {
       required: ['username', 'password'],
     },
   })
+  @Post()
   async login(@Res({ passthrough: true }) res: Response, @Request() req) {
     try {
-      const { accessToken, refreshToken } = await this.authService.login(
+      const { accessToken, refreshToken, user } = await this.authService.login(
         req?.user,
       );
 
@@ -55,7 +56,7 @@ export class AuthController {
           secure: true,
         })
 
-        .send({ accessToken, refreshToken });
+        .send({ accessToken, refreshToken, user });
     } catch (error) {
       console.error(error);
       throw error;

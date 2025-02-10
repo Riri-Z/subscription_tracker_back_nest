@@ -14,7 +14,7 @@ export class SubscriptionsService {
   constructor(
     @InjectRepository(Subscription)
     private readonly subscriptionRepository: Repository<Subscription>,
-  ) { }
+  ) {}
 
   async create(createSubscriptionDto: CreateSubscriptionDto) {
     try {
@@ -38,9 +38,9 @@ export class SubscriptionsService {
   async findAllWithIcons() {
     const result = await this.subscriptionRepository.find({
       where: {
-        icon_url: Not(IsNull())
-      }
-    })
+        icon_url: Not(IsNull()),
+      },
+    });
 
     return result;
   }
@@ -95,7 +95,7 @@ export class SubscriptionsService {
         subscription.icon_url =
           process.env.CDN_ICONS_BASE + '/' + subscription.name + '.svg';
         // save icon url in database
-        await this.update(subscription.id, subscription)
+        await this.update(subscription.id, subscription);
       }
       return subscription;
     } else {

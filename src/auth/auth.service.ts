@@ -37,7 +37,11 @@ export class AuthService {
 
   async login(user: User) {
     try {
-      return await this.getTokens(user.id, user.username);
+      const { accessToken, refreshToken } = await this.getTokens(
+        user.id,
+        user.username,
+      );
+      return { accessToken, refreshToken, user };
     } catch (error) {
       throw new InternalServerErrorException('Error login user', {
         cause: error,
@@ -46,7 +50,6 @@ export class AuthService {
   }
 
   async logout(user: JwtPayload): Promise<string> {
-    console.log('user', user);
     return 'User  has been log out';
   }
 
