@@ -56,6 +56,7 @@ export class UserSubscriptionsService {
           startDate: createUserSubscriptionDto.startDate,
           endDate: createUserSubscriptionDto.endDate,
           renewalDate: createUserSubscriptionDto.renewalDate,
+          category: createUserSubscriptionDto.category,
           amount: createUserSubscriptionDto.amount,
           billingCycle: createUserSubscriptionDto.billingCycle,
           status:
@@ -318,6 +319,10 @@ export class UserSubscriptionsService {
         console.log('error updating user-sub', err);
         // since we have errors lets rollback the changes we made
         await queryRunner.rollbackTransaction();
+        throw new InternalServerErrorException(
+          'Error updating user-subscription',
+          { cause: err },
+        );
       } finally {
         // you need to release a queryRunner which was manually instantiated
         await queryRunner.release();

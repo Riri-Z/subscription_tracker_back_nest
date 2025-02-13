@@ -11,6 +11,7 @@ import {
   Req,
   UnauthorizedException,
   HttpStatus,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { UserSubscriptionsService } from './user-subscriptions.service';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
@@ -71,11 +72,18 @@ export class UserSubscriptionsController {
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: number,
     @Body() updateUserSubscriptionDto: UpdateUserSubscriptionDto,
   ) {
-    return this.userSubscriptionsService.update(+id, updateUserSubscriptionDto);
+    try {
+      await this.userSubscriptionsService.update(id, updateUserSubscriptionDto);
+      return this.apiResponseService.apiResponse(HttpStatus.OK);
+    } catch (e) {
+      throw new InternalServerErrorException(
+        `Une erreur est survenue lors de la mis à jour de l'abonnement`,
+      );
+    }
   }
 
   @Delete(':id')
