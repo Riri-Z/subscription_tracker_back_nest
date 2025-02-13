@@ -21,7 +21,7 @@ export class UserSubscriptionsService {
     private readonly userSubscriptionRepository: Repository<UserSubscriptions>,
     private readonly dataSource: DataSource,
     private readonly subscriptionsService: SubscriptionsService,
-  ) { }
+  ) {}
 
   BILLING_CYCLE_TO_UNIT_DAY_JS: Record<BillingCycle, dayjs.ManipulateType> = {
     [BillingCycle.WEEKLY]: 'week',
@@ -39,13 +39,13 @@ export class UserSubscriptionsService {
       const subscriptionId = subscription
         ? subscription.id
         : //create subscription if it doesn't exist
-        await this.subscriptionsService
-          .create({
-            name: createUserSubscriptionDto.subscriptionName,
-            // TODO : find a way to set one by default if possible
-            icon_name: createUserSubscriptionDto?.icon_name,
-          })
-          .then((res) => res.id);
+          await this.subscriptionsService
+            .create({
+              name: createUserSubscriptionDto.subscriptionName,
+              // TODO : find a way to set one by default if possible
+              icon_name: createUserSubscriptionDto?.icon_name,
+            })
+            .then((res) => res.id);
 
       // Do we need to allow one type of subscription per user ?
       // eg : one netflix subscription , one amazon subscription
@@ -56,6 +56,7 @@ export class UserSubscriptionsService {
           startDate: createUserSubscriptionDto.startDate,
           endDate: createUserSubscriptionDto.endDate,
           renewalDate: createUserSubscriptionDto.renewalDate,
+          category: createUserSubscriptionDto.category,
           amount: createUserSubscriptionDto.amount,
           billingCycle: createUserSubscriptionDto.billingCycle,
           status:
@@ -141,9 +142,9 @@ export class UserSubscriptionsService {
         try {
           if (!userSubscriptions.subscription.icon_url) {
             userSubscriptions.subscription =
-            await this.subscriptionsService.generateIconUrl(
-              userSubscriptions.subscription,
-            );
+              await this.subscriptionsService.generateIconUrl(
+                userSubscriptions.subscription,
+              );
           }
         } catch (error) {
           console.error(
@@ -318,6 +319,10 @@ export class UserSubscriptionsService {
         console.log('error updating user-sub', err);
         // since we have errors lets rollback the changes we made
         await queryRunner.rollbackTransaction();
+        throw new InternalServerErrorException(
+          'Error updating user-subscription',
+          { cause: err },
+        );
       } finally {
         // you need to release a queryRunner which was manually instantiated
         await queryRunner.release();

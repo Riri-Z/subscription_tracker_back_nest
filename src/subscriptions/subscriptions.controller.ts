@@ -17,8 +17,8 @@ import { ApiResponseService } from 'src/shared/api-response/api-response.service
 export class SubscriptionsController {
   constructor(
     private readonly subscriptionsService: SubscriptionsService,
-    private readonly apiResponseService: ApiResponseService
-  ) { }
+    private readonly apiResponseService: ApiResponseService,
+  ) {}
 
   @Post()
   create(@Body() createSubscriptionDto: CreateSubscriptionDto) {
@@ -26,8 +26,8 @@ export class SubscriptionsController {
   }
   @Get('/with-icons')
   async findAllWithIcons() {
-    const result = await this.subscriptionsService.findAllWithIcons()
-    return this.apiResponseService.apiResponse(HttpStatus.OK, result)
+    const result = await this.subscriptionsService.findAllWithIcons();
+    return this.apiResponseService.apiResponse(HttpStatus.OK, result);
   }
 
   @Get()
@@ -39,8 +39,6 @@ export class SubscriptionsController {
   findOne(@Param('id') id: string) {
     return this.subscriptionsService.findOneById(+id);
   }
-
-
 
   @Patch(':id')
   update(

@@ -9,7 +9,6 @@ describe('UsersController', () => {
 
   const mockUserService = {
     create: jest.fn().mockReturnValue({
-      name: 'testtest',
       username: 'testtest',
       password: 'aaaaada',
       email: 'testtest@gmail.com',
@@ -19,7 +18,7 @@ describe('UsersController', () => {
       {
         id: 31,
         email: 'pzqodpqzodpzq@gmail.com',
-        name: 'pzqodpqzodpzq',
+
         username: 'pzqodpqzodpzq',
         roles: ['ADMIN'],
         createdAt: '2024-09-20T06:49:54.013Z',
@@ -28,7 +27,7 @@ describe('UsersController', () => {
       {
         id: 32,
         email: 'testtest@gmail.com',
-        name: 'testtest',
+
         username: 'testtest',
         roles: ['ADMIN'],
         createdAt: '2024-09-20T07:28:06.465Z',
@@ -37,7 +36,7 @@ describe('UsersController', () => {
       {
         id: 33,
         email: 'xxx@gmail.com',
-        name: 'xxx',
+
         username: 'xxx',
         roles: ['USER'],
         createdAt: '2024-09-23T06:49:56.388Z',
@@ -47,7 +46,7 @@ describe('UsersController', () => {
     findOneById: jest.fn().mockReturnValue({
       id: 31,
       email: 'pzqodpqzodpzq@gmail.com',
-      name: 'pzqodpqzodpzq',
+
       username: 'pzqodpqzodpzq',
       roles: ['ADMIN'],
       createdAt: '2024-09-20T06:49:54.013Z',
@@ -56,7 +55,7 @@ describe('UsersController', () => {
     findOneByUsername: jest.fn().mockReturnValue({
       id: 31,
       email: 'pzqodpqzodpzq@gmail.com',
-      name: 'pzqodpqzodpzq',
+
       username: 'pzqodpqzodpzq',
       roles: ['ADMIN'],
       createdAt: '2024-09-20T06:49:54.013Z',
@@ -65,7 +64,7 @@ describe('UsersController', () => {
     update: jest.fn().mockReturnValue({
       id: 31,
       email: 'pzqodpqzodpzq@gmail.com',
-      name: 'pzqodpqzodpzq',
+
       username: 'pzqodpqzodpzq',
       roles: ['ADMIN'],
       createdAt: '2024-09-20T06:49:54.013Z',
@@ -102,7 +101,6 @@ describe('UsersController', () => {
           createdAt: '2024-09-20T06:49:54.013Z',
           email: 'pzqodpqzodpzq@gmail.com',
           id: 31,
-          name: 'pzqodpqzodpzq',
           roles: ['ADMIN'],
           updatedAt: '2024-09-20T06:49:54.013Z',
           username: 'pzqodpqzodpzq',
@@ -111,7 +109,6 @@ describe('UsersController', () => {
           createdAt: '2024-09-20T07:28:06.465Z',
           email: 'testtest@gmail.com',
           id: 32,
-          name: 'testtest',
           roles: ['ADMIN'],
           updatedAt: '2024-09-20T07:28:06.465Z',
           username: 'testtest',
@@ -120,7 +117,6 @@ describe('UsersController', () => {
           createdAt: '2024-09-23T06:49:56.388Z',
           email: 'xxx@gmail.com',
           id: 33,
-          name: 'xxx',
           roles: ['USER'],
           updatedAt: '2024-09-23T06:49:56.388Z',
           username: 'xxx',

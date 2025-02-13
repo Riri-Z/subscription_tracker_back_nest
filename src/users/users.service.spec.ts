@@ -41,7 +41,7 @@ describe('UsersService unit tests', () => {
       //Body
       const createUserDto: CreateUserDto = {
         email: 'user3@gmail.com',
-        name: 'user3',
+
         username: 'user3',
         password: 'testPassword',
         roles: [UserRole.ADMIN],
@@ -50,7 +50,7 @@ describe('UsersService unit tests', () => {
       const createdUser = {
         id: 3,
         email: 'user3@gmail.com',
-        name: 'user3',
+
         username: 'user3',
         password: 'hashPassword',
         roles: [UserRole.ADMIN],
@@ -62,7 +62,7 @@ describe('UsersService unit tests', () => {
       const expectedResponse: User = {
         id: 3,
         email: 'user3@gmail.com',
-        name: 'user3',
+
         username: 'user3',
         password: 'hashPassword',
         roles: [UserRole.ADMIN],
@@ -95,7 +95,7 @@ describe('UsersService unit tests', () => {
         {
           id: 6,
           email: 'test@gmail.com',
-          name: 'test',
+
           username: 'test',
           password: 'testPassword',
           roles: [UserRole.ADMIN],
@@ -106,7 +106,7 @@ describe('UsersService unit tests', () => {
         {
           id: 3,
           email: 'user3@gmail.com',
-          name: 'user3',
+
           username: 'user3',
           password: 'testPassword',
           roles: [UserRole.ADMIN],
@@ -125,7 +125,7 @@ describe('UsersService unit tests', () => {
       const userMock: User = {
         id: 13,
         email: 'test@gmail.com',
-        name: 'test',
+
         password: 'test',
         username: 'test',
         roles: [UserRole.ADMIN],
@@ -148,14 +148,12 @@ describe('UsersService unit tests', () => {
       const id = 99;
 
       const updateUserBodyDto: UpdateUserDto = {
-        name: 'newName',
         roles: role,
       };
 
       const mockResult: User = {
         id,
         email: 'test@gmail.com',
-        name: 'newName',
         username: 'test',
         password: 'test',
         roles: [UserRole.ADMIN],
@@ -166,7 +164,6 @@ describe('UsersService unit tests', () => {
       const existingUser: User = {
         id,
         email: 'test@gmail.com',
-        name: 'test',
         password: 'test',
         username: 'test',
         roles: [UserRole.USER],

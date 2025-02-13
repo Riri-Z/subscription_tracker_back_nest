@@ -13,7 +13,7 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Controller('auth/')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @UseGuards(LocalAuthGuard)
   @ApiBasicAuth()
@@ -37,9 +37,10 @@ export class AuthController {
       required: ['username', 'password'],
     },
   })
+  @Post()
   async login(@Res({ passthrough: true }) res: Response, @Request() req) {
     try {
-      const { accessToken, refreshToken } = await this.authService.login(
+      const { accessToken, refreshToken, userWithoutConfidentialData } = await this.authService.login(
         req?.user,
       );
 
@@ -55,7 +56,7 @@ export class AuthController {
           secure: true,
         })
 
-        .send({ accessToken, refreshToken });
+        .send({ accessToken, refreshToken, user: userWithoutConfidentialData });
     } catch (error) {
       console.error(error);
       throw error;

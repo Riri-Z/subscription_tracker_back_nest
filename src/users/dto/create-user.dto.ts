@@ -5,10 +5,6 @@ import { UserRole } from '../enums/UserRole';
 export class CreateUserDto {
   @ApiProperty()
   @IsNotEmpty()
-  name: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
   username: string;
 
   @ApiProperty()

@@ -11,6 +11,7 @@ import { BillingCycle } from '../../users/enums/billingCycle';
 import { StatusSubscription } from '../../users/enums/statusSubscription';
 import { Subscription } from 'src/subscriptions/entities/subscription.entity';
 import { User } from '../../users/entities/user.entity';
+import { DecimalColumnTransformer } from 'src/transformer/DecimalColumnTransformer';
 
 @Entity({
   name: 'user_subscription',
@@ -34,7 +35,12 @@ export class UserSubscriptions {
   @Column({ nullable: true })
   renewalDate: Date;
 
-  @Column()
+  @Column('decimal', {
+    precision: 6,
+    scale: 2,
+    transformer: new DecimalColumnTransformer(),
+    default: 0,
+  })
   amount: number;
 
   @Column({ nullable: true })
