@@ -14,10 +14,6 @@ export class ResponseUserDTO {
 
   @ApiProperty()
   @Expose()
-  name: string;
-
-  @ApiProperty()
-  @Expose()
   username: string;
 
   @ApiProperty()

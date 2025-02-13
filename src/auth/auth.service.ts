@@ -41,7 +41,14 @@ export class AuthService {
         user.id,
         user.username,
       );
-      return { accessToken, refreshToken, user };
+      const {
+        createdAt,
+        updatedAt,
+        deletedAt,
+        password,
+        ...userWithoutConfidentialData
+      } = user;
+      return { accessToken, refreshToken, userWithoutConfidentialData };
     } catch (error) {
       throw new InternalServerErrorException('Error login user', {
         cause: error,

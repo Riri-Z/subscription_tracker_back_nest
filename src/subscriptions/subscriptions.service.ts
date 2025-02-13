@@ -104,7 +104,7 @@ export class SubscriptionsService {
   }
 
   /**
-   * This methode aims to check icon avalibility on CDN for a given  name
+   * This methode aims to check icon avalability on CDN for a given  name
    * @param nameSubscription
    * @returns Response with status code 200 or 404
    */

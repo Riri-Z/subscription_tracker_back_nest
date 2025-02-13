@@ -27,7 +27,6 @@ export class UsersService {
       const user = new User();
       user.roles = this.validateRole(createUserDto.roles);
       user.email = createUserDto.email;
-      user.name = createUserDto.name;
       user.password = await this.hashService.hashPassword(
         createUserDto.password,
       );
