@@ -62,7 +62,12 @@ export class UserSubscriptionsService {
           status:
             createUserSubscriptionDto.status ?? StatusSubscription['ACTIVE'],
         });
-
+      console.info(
+        'new subscription :',
+        createUserSubscriptionDto.subscriptionName,
+        'has been add to user :',
+        createdUserSubscription.userId,
+      );
       return createdUserSubscription;
     } catch (error) {
       console.log(error);

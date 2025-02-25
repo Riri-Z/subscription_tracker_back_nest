@@ -13,7 +13,7 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Controller('auth/')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
   @ApiBasicAuth()
@@ -40,27 +40,22 @@ export class AuthController {
   @Post()
   async login(@Res({ passthrough: true }) res: Response, @Request() req) {
     try {
-      const { accessToken, refreshToken, userWithoutConfidentialData } = await this.authService.login(
-        req?.user,
-      );
+      const { accessToken, refreshToken, userWithoutConfidentialData } =
+        await this.authService.login(req?.user);
 
       res
-        .cookie('accessToken', accessToken, {
-          maxAge: 1 * 60 * 60 * 1000, //1h,
-          httpOnly: true,
-          secure: true,
-        })
-        .cookie('refreshToken', refreshToken, {
-          maxAge: 1 * 60 * 60 * 1000, //1h,
-          httpOnly: true,
-          secure: true,
-        })
-
-        .send({ accessToken, refreshToken, user: userWithoutConfidentialData });
+        .status(200)
+        .json({ accessToken, refreshToken, user: userWithoutConfidentialData });
     } catch (error) {
       console.error(error);
       throw error;
     }
+  }
+  @Post('refresh')
+  async refresh(@Res() res: Response, @Request() req) {
+    const { refreshToken } = req.body;
+    const result = await this.authService.refresh(refreshToken);
+    return res.status(200).json(result);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -68,14 +63,6 @@ export class AuthController {
   @Post('logout')
   async logout(@Res() res: Response, @Request() req) {
     const user: JwtPayload = req?.user;
-
-    const cookies = req?.cookies;
-    if (cookies?.accessToken) {
-      res.clearCookie('accessToken');
-    }
-    if (cookies?.refreshToken) {
-      res.clearCookie('refreshToken');
-    }
     const result = await this.authService.logout(user);
 
     return res.status(200).json({

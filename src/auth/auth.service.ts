@@ -56,6 +56,13 @@ export class AuthService {
     }
   }
 
+  async refresh(refreshToken: string) {
+    const payload = await this.jwtService.verifyAsync(refreshToken);
+    const user = await this.userService.findOneByUsername(payload.username);
+
+    return this.login(user);
+  }
+
   async logout(user: JwtPayload): Promise<string> {
     return 'User  has been log out';
   }
@@ -69,7 +76,7 @@ export class AuthService {
         },
         {
           secret: this.configService.get<string>('JWT_SECRET'),
-          expiresIn: '2h',
+          expiresIn: '24h',
         },
       ),
       this.jwtService.signAsync(

@@ -89,7 +89,7 @@ export class SubscriptionsService {
       const isIconExistOnCloud = await this.verifySubscriptionIconUrl(
         subscription.name.toLowerCase(),
       );
-      if (!isIconExistOnCloud.ok) {
+      if (!isIconExistOnCloud) {
         subscription.icon_url = null;
       } else {
         subscription.icon_url =
@@ -109,14 +109,16 @@ export class SubscriptionsService {
    * @returns Response with status code 200 or 404
    */
   async verifySubscriptionIconUrl(nameSubscription: string) {
+    if (!nameSubscription) {
+      return false;
+    }
     try {
-      const response = await fetch(
+      return await fetch(
         process.env.CDN_ICONS_BASE + '/' + nameSubscription + '.svg',
       );
-      return { ok: response.ok };
     } catch (error) {
-      console.error(`Error verifying subscription icon URL: ${error.message}`);
-      return { ok: false };
+      console.info(`Error verifying subscription icon URL: ${error.message}`);
+      return false;
     }
   }
 }
