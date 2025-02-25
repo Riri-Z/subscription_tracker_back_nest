@@ -78,46 +78,56 @@ export class SubscriptionsService {
   }
 
   /**
-   * Generate icon_url property based on subscription.name.
-   * It call verifySubscriptionIconUrl method, and set the right url for icon_url property
+   * Generate icon_url property based on subscription.name and update icon url
+   * for the given subscription.
+   * It call iconExistsOnCDN method, and set the right url for icon_url property
    * @param subscription Subscription
    * @returns Subscription
    */
-  async generateIconUrl(subscription: Subscription) {
-    if (subscription?.name) {
-      // TODO : Maybe use cache to prevent  multiple  call http
-      const isIconExistOnCloud = await this.verifySubscriptionIconUrl(
-        subscription.name.toLowerCase(),
-      );
-      if (!isIconExistOnCloud) {
-        subscription.icon_url = null;
-      } else {
-        subscription.icon_url =
-          process.env.CDN_ICONS_BASE + '/' + subscription.name + '.svg';
-        // save icon url in database
-        await this.update(subscription.id, subscription);
-      }
+  async updateSubscriptionIconUrl(subscription: Subscription) {
+    if (!subscription?.name) {
       return subscription;
-    } else {
+    }
+    try {
+      // TODO : Maybe use cache to prevent  multiple  call http
+      const iconExists = await this.iconExistsOnCDN(subscription.name);
+
+      if (iconExists) {
+        subscription.icon_url =
+          process.env.CDN_ICONS_BASE +
+          '/' +
+          subscription.name.toLowerCase() +
+          '.svg';
+      } else {
+        subscription.icon_url = null;
+      }
+
+      // save icon url in database
+      await this.update(subscription.id, subscription);
+      return subscription;
+    } catch (error) {
+      console.info('Error generating icon url error :', error);
       return subscription;
     }
   }
 
   /**
    * This methode aims to check icon avalability on CDN for a given  name
-   * @param nameSubscription
-   * @returns Response with status code 200 or 404
+   * @param subscriptionName
+   * @returns Boolean true / false if icon is available
    */
-  async verifySubscriptionIconUrl(nameSubscription: string) {
-    if (!nameSubscription) {
+  async iconExistsOnCDN(subscriptionName: string): Promise<boolean> {
+    if (!subscriptionName) {
       return false;
     }
     try {
-      return await fetch(
-        process.env.CDN_ICONS_BASE + '/' + nameSubscription + '.svg',
-      );
+      const normalizedNamed = subscriptionName.toLowerCase();
+      const iconUrl =
+        process.env.CDN_ICONS_BASE + '/' + normalizedNamed + '.svg';
+      const response = await fetch(iconUrl);
+      return response.ok;
     } catch (error) {
-      console.info(`Error verifying subscription icon URL: ${error.message}`);
+      console.info(`${subscriptionName} icon is unavailable: ${error.message}`);
       return false;
     }
   }

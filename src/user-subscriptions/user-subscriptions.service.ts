@@ -147,7 +147,7 @@ export class UserSubscriptionsService {
         try {
           if (!userSubscriptions.subscription.icon_url) {
             userSubscriptions.subscription =
-              await this.subscriptionsService.generateIconUrl(
+              await this.subscriptionsService.updateSubscriptionIconUrl(
                 userSubscriptions.subscription,
               );
           }
