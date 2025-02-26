@@ -12,13 +12,16 @@ import { User } from './entities/user.entity';
 import { EntityNotFoundError, Repository } from 'typeorm';
 import { UserRole } from './enums/UserRole';
 import { HashService } from 'src/shared/utils/hash.service';
+import { JwtService } from '@nestjs/jwt';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-
+    private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
     private readonly hashService: HashService,
   ) {}
 
@@ -66,6 +69,22 @@ export class UsersService {
 
   async findOneByUsername(username: string) {
     return await this.userRepository.findOneByOrFail({ username });
+  }
+
+  async requestResetPassword(email: string) {
+    const user = await this.userRepository.findOneBy({
+      email,
+    });
+
+    if (!user) return;
+
+    const payload = { sub: user.id, email: user.email };
+    const token = await this.jwtService.signAsync(payload, {
+      expiresIn: '20m',
+    });
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+
+    await this.mailService.sendResetPassword(email, resetUrl);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {

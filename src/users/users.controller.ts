@@ -18,6 +18,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EntityNotFoundError } from 'typeorm';
 import { ResponseUserDTO } from './dto/response-user.dto';
@@ -34,6 +35,23 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly apiResponseService: ApiResponseService,
   ) {}
+
+  @Post('request-reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    try {
+      const { email } = resetPasswordDto;
+      await this.usersService.requestResetPassword(email);
+      return this.apiResponseService.apiResponse(HttpStatus.OK, {
+        message:
+          'Si votre email est enregistré, vous recevrez un lien de réinitialisation.',
+      });
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        return this.apiResponseService.apiResponse(HttpStatus.OK);
+      }
+      return this.apiResponseService.apiResponse(HttpStatus.BAD_REQUEST);
+    }
+  }
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {

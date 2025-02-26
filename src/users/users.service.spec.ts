@@ -4,6 +4,8 @@ import {
   MockUserRepository,
   mockHashService,
   ProvidersWithMockDomainRepository,
+  mockMailService,
+  mockJwtService,
 } from './test/test-utils';
 import { UserRole } from './enums/UserRole';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -11,6 +13,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { afterEach } from 'node:test';
 import { User } from './entities/user.entity';
 import { HashService } from '../shared/utils/hash.service';
+import { MailService } from 'src/mail/mail.service';
+import { JwtService } from '@nestjs/jwt';
 
 describe('UsersService unit tests', () => {
   let userService: UsersService;
@@ -18,6 +22,15 @@ describe('UsersService unit tests', () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       providers: ProvidersWithMockDomainRepository([
         UsersService,
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
+        },
+        {
+          provide: MailService,
+          useValue: mockMailService,
+        },
+
         {
           provide: HashService,
           useValue: mockHashService,

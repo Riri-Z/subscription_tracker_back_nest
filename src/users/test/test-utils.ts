@@ -11,6 +11,14 @@ export const MockUserRepository = {
   delete: jest.fn(),
   findOneByOrFail: jest.fn(),
 };
+//Mock MailService
+export const mockMailService = {
+  sendResetPassword: jest.fn().mockResolvedValue(undefined),
+};
+
+export const mockJwtService = {
+  signAsync: jest.fn().mockResolvedValue('dzqjdjzqdz'),
+};
 
 // Mock for HashService
 export const mockHashService = {
