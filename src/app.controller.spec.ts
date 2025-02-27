@@ -45,13 +45,17 @@ describe('AppController', () => {
       providers: [
         AppService,
         JwtService,
-        AuthService,
+
         ApiResponseService,
         JwtService,
         HashService,
         {
           provide: ConfigService,
           useValue: mockConfigService,
+        },
+        {
+          provide: AuthService,
+          useValue: {},
         },
         {
           provide: JwtService,

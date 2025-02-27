@@ -15,6 +15,7 @@ import { User } from './entities/user.entity';
 import { HashService } from '../shared/utils/hash.service';
 import { MailService } from 'src/mail/mail.service';
 import { JwtService } from '@nestjs/jwt';
+import { AuthService } from 'src/auth/auth.service';
 
 describe('UsersService unit tests', () => {
   let userService: UsersService;
@@ -30,7 +31,10 @@ describe('UsersService unit tests', () => {
           provide: MailService,
           useValue: mockMailService,
         },
-
+        {
+          provide: AuthService,
+          useValue: {},
+        },
         {
           provide: HashService,
           useValue: mockHashService,
@@ -54,7 +58,7 @@ describe('UsersService unit tests', () => {
       //Body
       const createUserDto: CreateUserDto = {
         email: 'user3@gmail.com',
-
+        activeResetId: null,
         username: 'user3',
         password: 'testPassword',
         roles: [UserRole.ADMIN],
@@ -63,7 +67,7 @@ describe('UsersService unit tests', () => {
       const createdUser = {
         id: 3,
         email: 'user3@gmail.com',
-
+        activeResetId: null,
         username: 'user3',
         password: 'hashPassword',
         roles: [UserRole.ADMIN],
@@ -75,7 +79,7 @@ describe('UsersService unit tests', () => {
       const expectedResponse: User = {
         id: 3,
         email: 'user3@gmail.com',
-
+        activeResetId: null,
         username: 'user3',
         password: 'hashPassword',
         roles: [UserRole.ADMIN],
@@ -108,6 +112,7 @@ describe('UsersService unit tests', () => {
         {
           id: 6,
           email: 'test@gmail.com',
+          activeResetId: null,
 
           username: 'test',
           password: 'testPassword',
@@ -119,6 +124,7 @@ describe('UsersService unit tests', () => {
         {
           id: 3,
           email: 'user3@gmail.com',
+          activeResetId: null,
 
           username: 'user3',
           password: 'testPassword',
@@ -138,6 +144,7 @@ describe('UsersService unit tests', () => {
       const userMock: User = {
         id: 13,
         email: 'test@gmail.com',
+        activeResetId: null,
 
         password: 'test',
         username: 'test',
@@ -167,6 +174,8 @@ describe('UsersService unit tests', () => {
       const mockResult: User = {
         id,
         email: 'test@gmail.com',
+        activeResetId: null,
+
         username: 'test',
         password: 'test',
         roles: [UserRole.ADMIN],
@@ -177,6 +186,8 @@ describe('UsersService unit tests', () => {
       const existingUser: User = {
         id,
         email: 'test@gmail.com',
+        activeResetId: null,
+
         password: 'test',
         username: 'test',
         roles: [UserRole.USER],

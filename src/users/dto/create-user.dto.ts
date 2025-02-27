@@ -15,6 +15,9 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
+  @ApiProperty()
+  activeResetId: string | null;
+
   @ApiProperty({ enum: UserRole, isArray: true })
   @IsNotEmpty()
   roles: UserRole[];

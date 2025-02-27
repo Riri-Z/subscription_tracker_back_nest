@@ -23,6 +23,12 @@ export class User {
   @Column({ unique: true })
   username: string;
 
+  @Column({
+    unique: true,
+    nullable: true,
+  })
+  activeResetId: string | null;
+
   @Column()
   password: string;
 

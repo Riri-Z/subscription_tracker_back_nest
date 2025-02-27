@@ -15,6 +15,8 @@ import {
   InternalServerErrorException,
   ConflictException,
   UseGuards,
+  Query,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -37,14 +39,11 @@ export class UsersController {
   ) {}
 
   @Post('request-reset-password')
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+  async requestResetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     try {
       const { email } = resetPasswordDto;
       await this.usersService.requestResetPassword(email);
-      return this.apiResponseService.apiResponse(HttpStatus.OK, {
-        message:
-          'Si votre email est enregistré, vous recevrez un lien de réinitialisation.',
-      });
+      return this.apiResponseService.apiResponse(HttpStatus.OK);
     } catch (error) {
       if (error instanceof EntityNotFoundError) {
         return this.apiResponseService.apiResponse(HttpStatus.OK);
@@ -52,7 +51,28 @@ export class UsersController {
       return this.apiResponseService.apiResponse(HttpStatus.BAD_REQUEST);
     }
   }
-
+  @Post('reset-password')
+  async resetPassword(
+    @Body() password: { password: string },
+    @Query() { token }: { token: string },
+  ) {
+    try {
+      if (!token || !password) {
+        return this.apiResponseService.apiResponse(HttpStatus.BAD_REQUEST);
+      }
+      const result = await this.usersService.resetPassword(
+        password.password,
+        token,
+      );
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+      return this.apiResponseService.apiResponse(HttpStatus.OK, result.message);
+    } catch (error) {
+      console.error(error);
+      throw new UnauthorizedException(error.message);
+    }
+  }
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     try {

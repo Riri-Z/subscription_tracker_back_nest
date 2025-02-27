@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -14,13 +16,19 @@ import { UserRole } from './enums/UserRole';
 import { HashService } from 'src/shared/utils/hash.service';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
+import { AuthService } from 'src/auth/auth.service';
+import { jwtConstants } from 'src/auth/constants';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
+    // Circular dependency: we need to use forwardRef injection here and in both module files to tell NestJS how to resolve this cyclical relationship
+    @Inject(forwardRef(() => AuthService))
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly authService: AuthService,
     private readonly mailService: MailService,
     private readonly hashService: HashService,
   ) {}
@@ -30,6 +38,8 @@ export class UsersService {
       const user = new User();
       user.roles = this.validateRole(createUserDto.roles);
       user.email = createUserDto.email;
+      user.activeResetId = null;
+
       user.password = await this.hashService.hashPassword(
         createUserDto.password,
       );
@@ -71,6 +81,10 @@ export class UsersService {
     return await this.userRepository.findOneByOrFail({ username });
   }
 
+  async resetPassword(password: string, token: string) {
+    return await this.authService.resetPassword(password, token);
+  }
+
   async requestResetPassword(email: string) {
     const user = await this.userRepository.findOneBy({
       email,
@@ -78,13 +92,23 @@ export class UsersService {
 
     if (!user) return;
 
-    const payload = { sub: user.id, email: user.email };
+    user.activeResetId = randomUUID(); // Générer un identifiant unique
+    const { id, ...userWithoutId } = user;
+    await this.update(user.id, userWithoutId);
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+      activeResetId: user.activeResetId,
+    };
     const token = await this.jwtService.signAsync(payload, {
       expiresIn: '20m',
+      secret: jwtConstants.secret,
     });
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
-    await this.mailService.sendResetPassword(email, resetUrl);
+    return await this.mailService.sendResetPassword(email, resetUrl);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {

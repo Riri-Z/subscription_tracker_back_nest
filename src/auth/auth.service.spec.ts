@@ -16,12 +16,15 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         JwtService,
-        UsersService,
         HashService,
         ConfigService,
         {
           provide: MailService,
           useValue: mockMailService,
+        },
+        {
+          provide: UsersService,
+          useValue: {},
         },
         {
           provide: getRepositoryToken(User),
