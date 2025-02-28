@@ -4,7 +4,12 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { SharedModule } from './shared/shared.module';
-import { mockConfigService, MockUserRepository } from './users/test/test-utils';
+import {
+  mockConfigService,
+  mockJwtService,
+  mockMailService,
+  MockUserRepository,
+} from './users/test/test-utils';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { AuthService } from './auth/auth.service';
@@ -12,6 +17,7 @@ import { ApiResponseService } from './shared/api-response/api-response.service';
 import { JwtService } from '@nestjs/jwt';
 import { HashService } from './shared/utils/hash.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailService } from './mail/mail.service';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -39,13 +45,25 @@ describe('AppController', () => {
       providers: [
         AppService,
         JwtService,
-        AuthService,
+
         ApiResponseService,
         JwtService,
         HashService,
         {
           provide: ConfigService,
           useValue: mockConfigService,
+        },
+        {
+          provide: AuthService,
+          useValue: {},
+        },
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
+        },
+        {
+          provide: MailService,
+          useValue: mockMailService,
         },
       ],
     })

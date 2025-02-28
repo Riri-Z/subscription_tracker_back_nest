@@ -16,6 +16,7 @@ import { UserSubscriptions } from './user-subscriptions/entities/user-subscripti
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
     UsersModule,
     AuthModule,

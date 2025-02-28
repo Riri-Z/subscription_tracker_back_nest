@@ -37,7 +37,7 @@ export class AuthController {
       required: ['username', 'password'],
     },
   })
-  @Post()
+  @Post('login')
   async login(@Res({ passthrough: true }) res: Response, @Request() req) {
     try {
       const { accessToken, refreshToken, userWithoutConfidentialData } =

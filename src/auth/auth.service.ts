@@ -1,14 +1,21 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { HashService } from 'src/shared/utils/hash.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
     private readonly hashService: HashService,
@@ -61,6 +68,54 @@ export class AuthService {
     const user = await this.userService.findOneByUsername(payload.username);
 
     return this.login(user);
+  }
+
+  async resetPassword(newPassword: string, token) {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: jwtConstants.secret,
+      });
+
+      const { id, ...user } = await this.userService.findOneByUsername(
+        payload.username,
+      );
+      if (user.activeResetId !== payload.activeResetId) {
+        return {
+          success: false,
+          message:
+            "Le lien de réinitialisation n'est plus valide. Veuillez faire une nouvelle demande.",
+        };
+      }
+      user.password = newPassword;
+      user.activeResetId = null;
+      await this.userService.update(id, user);
+      return {
+        success: true,
+        message: 'Nouveau mot de passe enregistré avec succés',
+      };
+    } catch (error) {
+      /* Token expired */
+      if (error instanceof TokenExpiredError) {
+        return {
+          success: false,
+          message: 'Le lien de réinitialisation a expiré',
+        };
+      }
+      /* Error payload */
+      if (error instanceof JsonWebTokenError) {
+        return { success: false, message: 'Lien de réinitialisation invalide' };
+      }
+      /* Any Error */
+      console.error(
+        'Erreur lors de la réinitialisation du mot de passe:',
+        error,
+      );
+      return {
+        success: false,
+        message:
+          'Une erreur est survenue lors de la réinitialisation du mot de passe',
+      };
+    }
   }
 
   async logout(user: JwtPayload): Promise<string> {

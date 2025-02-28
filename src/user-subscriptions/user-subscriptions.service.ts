@@ -104,7 +104,7 @@ export class UserSubscriptionsService {
       if (!endDate) {
         throw new BadRequestException('Invalid date format');
       }
-      let userSubscriptions = await this.userSubscriptionRepository.find({
+      const userSubscriptions = await this.userSubscriptionRepository.find({
         relations: { subscription: true },
         where: {
           userId,
