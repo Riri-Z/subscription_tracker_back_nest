@@ -42,8 +42,6 @@ export class UserSubscriptionsService {
           await this.subscriptionsService
             .create({
               name: createUserSubscriptionDto.subscriptionName,
-              // TODO : find a way to set one by default if possible
-              icon_name: createUserSubscriptionDto?.icon_name,
             })
             .then((res) => res.id);
 
@@ -292,11 +290,16 @@ export class UserSubscriptionsService {
         );
       }
 
+      const subscription = await this.subscriptionsService.findByName(
+        updateUserSubscriptionDto.subscriptionName,
+      );
+
       // TODO : check if newUserSubscription is complete. if not throw an error
       const newUserSubscription = {
         id: updateUserSubscriptionDto.id,
         userId: updateUserSubscriptionDto.userId,
-        subscriptionId: updateUserSubscriptionDto.subscription.id,
+        subscriptionId:
+          subscription?.id ?? updateUserSubscriptionDto.subscription.id,
         startDate: updateUserSubscriptionDto.startDate,
         endDate: updateUserSubscriptionDto.endDate,
         renewalDate: updateUserSubscriptionDto.renewalDate,
@@ -311,14 +314,6 @@ export class UserSubscriptionsService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       try {
-        await this.subscriptionsService.update(
-          newUserSubscription.subscriptionId,
-          {
-            name: updateUserSubscriptionDto.subscriptionName,
-            icon_name: updateUserSubscriptionDto.subscription.icon_name,
-          },
-        );
-
         await this.userSubscriptionRepository.update(id, newUserSubscription);
       } catch (err) {
         console.log('error updating user-sub', err);

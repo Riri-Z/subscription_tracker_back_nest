@@ -8,5 +8,5 @@ export class CreateSubscriptionDto {
   name: string;
 
   @ApiProperty({ required: false })
-  icon_name?: string;
+  icon_url?: string;
 }
