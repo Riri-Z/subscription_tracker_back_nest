@@ -21,7 +21,7 @@ export class UserSubscriptionsService {
     private readonly userSubscriptionRepository: Repository<UserSubscriptions>,
     private readonly dataSource: DataSource,
     private readonly subscriptionsService: SubscriptionsService,
-  ) {}
+  ) { }
 
   BILLING_CYCLE_TO_UNIT_DAY_JS: Record<BillingCycle, dayjs.ManipulateType> = {
     [BillingCycle.WEEKLY]: 'week',
@@ -39,11 +39,11 @@ export class UserSubscriptionsService {
       const subscriptionId = subscription
         ? subscription.id
         : //create subscription if it doesn't exist
-          await this.subscriptionsService
-            .create({
-              name: createUserSubscriptionDto.subscriptionName,
-            })
-            .then((res) => res.id);
+        await this.subscriptionsService
+          .create({
+            name: createUserSubscriptionDto.subscriptionName,
+          })
+          .then((res) => res.id);
 
       // Do we need to allow one type of subscription per user ?
       // eg : one netflix subscription , one amazon subscription
@@ -289,17 +289,26 @@ export class UserSubscriptionsService {
           ' userSubscription not found with the given ID: ' + id,
         );
       }
+      let subscriptionId: number | null = null
 
       const subscription = await this.subscriptionsService.findByName(
         updateUserSubscriptionDto.subscriptionName,
       );
+      if (!subscription) {
+        /* Create new subscription  with the new name, therefor we have an id to update the user subscription */
+        const responseNewSubscription = await this.subscriptionsService.create({
+          name: updateUserSubscriptionDto.subscriptionName,
+        })
+        subscriptionId = responseNewSubscription.id
+      } else {
+        subscriptionId = subscription.id
+      }
 
       // TODO : check if newUserSubscription is complete. if not throw an error
       const newUserSubscription = {
         id: updateUserSubscriptionDto.id,
         userId: updateUserSubscriptionDto.userId,
-        subscriptionId:
-          subscription?.id ?? updateUserSubscriptionDto.subscription.id,
+        subscriptionId,
         startDate: updateUserSubscriptionDto.startDate,
         endDate: updateUserSubscriptionDto.endDate,
         renewalDate: updateUserSubscriptionDto.renewalDate,
