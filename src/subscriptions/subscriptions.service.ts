@@ -16,8 +16,19 @@ export class SubscriptionsService {
     private readonly subscriptionRepository: Repository<Subscription>,
   ) {}
 
+  async getIconUrl(name) {
+    const isIconUrlExist = await this.iconExistsOnCDN(name);
+    if (!isIconUrlExist) return false;
+
+    return process.env.CDN_ICONS_BASE + '/' + name.toLowerCase() + '.svg';
+  }
+
   async create(createSubscriptionDto: CreateSubscriptionDto) {
     try {
+      const iconUrl = await this.getIconUrl(createSubscriptionDto.name);
+      if (iconUrl) {
+        createSubscriptionDto.icon_url = iconUrl;
+      }
       return await this.subscriptionRepository.save(createSubscriptionDto);
     } catch (error) {
       if (error.code === '23505') {
@@ -60,6 +71,10 @@ export class SubscriptionsService {
       });
       if (!currentSubscription) {
         throw new ConflictException('Subscription not found');
+      }
+      const iconUrl = await this.getIconUrl(updateSubscriptionDto.name);
+      if (iconUrl) {
+        updateSubscriptionDto.icon_url = iconUrl;
       }
       return await this.subscriptionRepository.update(
         id,
