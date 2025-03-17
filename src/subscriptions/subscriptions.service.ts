@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
@@ -18,7 +19,7 @@ export class SubscriptionsService {
 
   async getIconUrl(name) {
     const isIconUrlExist = await this.iconExistsOnCDN(name);
-    if (!isIconUrlExist) return false;
+    if (!isIconUrlExist) return null;
 
     return process.env.CDN_ICONS_BASE + '/' + name.toLowerCase() + '.svg';
   }
@@ -57,7 +58,7 @@ export class SubscriptionsService {
   }
 
   async findOneById(id: number) {
-    return await this.subscriptionRepository.findOneBy({ id });
+    return await this.subscriptionRepository.findOneByOrFail({ id });
   }
 
   async findByName(name: string) {
@@ -70,7 +71,7 @@ export class SubscriptionsService {
         id,
       });
       if (!currentSubscription) {
-        throw new ConflictException('Subscription not found');
+        throw new NotFoundException('Subscription not found');
       }
       const iconUrl = await this.getIconUrl(updateSubscriptionDto.name);
       if (iconUrl) {
@@ -81,6 +82,10 @@ export class SubscriptionsService {
         updateSubscriptionDto,
       );
     } catch (err) {
+      // Do not transform error if it's from http exception
+      if (err instanceof NotFoundException) {
+        throw err;
+      }
       throw new InternalServerErrorException(
         'Error updating subscription',
         err,
