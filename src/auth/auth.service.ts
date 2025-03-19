@@ -11,6 +11,7 @@ import { HashService } from 'src/shared/utils/hash.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { jwtConstants } from './constants';
+import { UserRole } from 'src/users/enums/UserRole';
 
 @Injectable()
 export class AuthService {
@@ -47,6 +48,7 @@ export class AuthService {
       const { accessToken, refreshToken } = await this.getTokens(
         user.id,
         user.username,
+        user.roles,
       );
       const {
         createdAt,
@@ -122,11 +124,12 @@ export class AuthService {
     return 'User  has been log out';
   }
 
-  async getTokens(userId: number, username: string) {
+  async getTokens(userId: number, username: string, roles: UserRole[]) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         {
           sub: userId,
+          roles,
           username,
         },
         {
@@ -137,6 +140,7 @@ export class AuthService {
       this.jwtService.signAsync(
         {
           sub: userId,
+          roles,
           username,
         },
         {
