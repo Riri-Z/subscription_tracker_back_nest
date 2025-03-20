@@ -94,8 +94,10 @@ export class UserSubscriptionsService {
   async invalidCacheUser(userId: number) {
     const cacheUserSubscriptionStore = `userSubscriptionByMonth_${userId}`;
     // Fetch array of keys cached userSubscription for given userId
-    const cachedKeys = await this.cacheService.get(cacheUserSubscriptionStore);
-    if (cachedKeys) {
+    const cachedKeys: unknown = await this.cacheService.get(
+      cacheUserSubscriptionStore,
+    );
+    if (Array.isArray(cachedKeys)) {
       for (const key of cachedKeys) {
         // Delete each  to clean redisStore
         await this.cacheService.delete(key);
@@ -160,6 +162,7 @@ export class UserSubscriptionsService {
 
         if (
           //check if the user data is not already present in user store
+          Array.isArray(currentCacheUserSubscription) &&
           !currentCacheUserSubscription.includes(cacheUserSubscriptionStore)
         ) {
           currentCacheUserSubscription.push(cacheKey);
@@ -348,7 +351,7 @@ export class UserSubscriptionsService {
         updateUserSubscriptionDto.subscriptionName,
       );
       if (!subscription) {
-        /* Create new subscription  with the new name, therefor we have an id to update the user subscription */
+        // Create new subscription  with the new name, therefor we have an id to update the user subscription
         const responseNewSubscription = await this.subscriptionsService.create({
           name: updateUserSubscriptionDto.subscriptionName,
         });
@@ -358,7 +361,7 @@ export class UserSubscriptionsService {
       }
 
       // TODO : check if newUserSubscription is complete. if not throw an error
-      const newUserSubscription = {
+      const newUserSubscription: Partial<UserSubscriptions> = {
         id: updateUserSubscriptionDto.id,
         userId: updateUserSubscriptionDto.userId,
         subscriptionId,
@@ -389,7 +392,6 @@ export class UserSubscriptionsService {
         // you need to release a queryRunner which was manually instantiated
         await queryRunner.release();
       }
-      // TODO : invalidate CACHE
       await this.invalidCacheUser(updateUserSubscriptionDto.userId);
       return `Updated successfully user-subscription`;
     } catch (error) {
