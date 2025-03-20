@@ -4,6 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserSubscriptions } from './entities/user-subscription.entity';
 import { SubscriptionsService } from 'src/subscriptions/subscriptions.service';
 import { DataSource } from 'typeorm';
+import { CacheService } from 'src/cache/cache.service';
 // TODO : COMPLETE THOSE TESTS
 describe('UserSubscriptionsService', () => {
   let service: UserSubscriptionsService;
@@ -21,6 +22,10 @@ describe('UserSubscriptionsService', () => {
         },
         {
           provide: SubscriptionsService,
+          useValue: {},
+        },
+        {
+          provide: CacheService,
           useValue: {},
         },
       ],

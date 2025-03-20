@@ -5,12 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserSubscriptions } from './entities/user-subscription.entity';
 import { SharedModule } from 'src/shared/shared.module';
 import { SubscriptionsModule } from 'src/subscriptions/subscriptions.module';
+import { CacheModule } from 'src/cache/cache.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserSubscriptions]),
     SharedModule,
     SubscriptionsModule,
+    CacheModule,
   ],
   controllers: [UserSubscriptionsController],
   providers: [UserSubscriptionsService],

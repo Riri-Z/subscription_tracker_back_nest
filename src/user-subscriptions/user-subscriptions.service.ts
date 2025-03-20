@@ -13,15 +13,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import dayjs, { Dayjs } from 'dayjs';
 import { StatusSubscription } from 'src/users/enums/statusSubscription';
 import { BillingCycle } from 'src/users/enums/billingCycle';
+import { CacheService } from 'src/cache/cache.service';
 
 @Injectable()
 export class UserSubscriptionsService {
   constructor(
     @InjectRepository(UserSubscriptions)
     private readonly userSubscriptionRepository: Repository<UserSubscriptions>,
+    private readonly cacheService: CacheService,
     private readonly dataSource: DataSource,
     private readonly subscriptionsService: SubscriptionsService,
-  ) { }
+  ) {}
 
   BILLING_CYCLE_TO_UNIT_DAY_JS: Record<BillingCycle, dayjs.ManipulateType> = {
     [BillingCycle.WEEKLY]: 'week',
@@ -39,11 +41,11 @@ export class UserSubscriptionsService {
       const subscriptionId = subscription
         ? subscription.id
         : //create subscription if it doesn't exist
-        await this.subscriptionsService
-          .create({
-            name: createUserSubscriptionDto.subscriptionName,
-          })
-          .then((res) => res.id);
+          await this.subscriptionsService
+            .create({
+              name: createUserSubscriptionDto.subscriptionName,
+            })
+            .then((res) => res.id);
 
       // Do we need to allow one type of subscription per user ?
       // eg : one netflix subscription , one amazon subscription
@@ -88,6 +90,20 @@ export class UserSubscriptionsService {
     });
   }
 
+  // Clear the cache for userSubscriptionByMonth_ based on the given userID
+  async invalidCacheUser(userId: number) {
+    const cacheUserSubscriptionStore = `userSubscriptionByMonth_${userId}`;
+    // Fetch array of keys cached userSubscription for given userId
+    const cachedKeys = await this.cacheService.get(cacheUserSubscriptionStore);
+    if (cachedKeys) {
+      for (const key of cachedKeys) {
+        // Delete each  to clean redisStore
+        await this.cacheService.delete(key);
+      }
+      await this.cacheService.delete(cacheUserSubscriptionStore);
+    }
+  }
+
   /**
    * Get active subscription for a given month
    * @param date start of the month
@@ -102,6 +118,15 @@ export class UserSubscriptionsService {
       if (!endDate) {
         throw new BadRequestException('Invalid date format');
       }
+      const cacheKey = `userSubscriptionByMonth_${date}_${userId}` as const;
+
+      // Return cacheData if present
+      const cachedData = await this.cacheService.get(cacheKey);
+      if (cachedData && Object.keys(cachedData).length > 0) {
+        return cachedData;
+      }
+
+      // Retreive userSubscriptions
       const userSubscriptions = await this.userSubscriptionRepository.find({
         relations: { subscription: true },
         where: {
@@ -117,7 +142,35 @@ export class UserSubscriptionsService {
         );
         return [];
       } else {
-        return this.processUserSubscriptions(userSubscriptions, endDate);
+        // Add additional information and forecast  payements
+        const processedUserSubscriptions = await this.processUserSubscriptions(
+          userSubscriptions,
+          endDate,
+        );
+
+        // Save in cache
+        await this.cacheService.set(cacheKey, processedUserSubscriptions);
+
+        // Update list user keys cache
+        const cacheUserSubscriptionStore =
+          `userSubscriptionByMonth_${userId}` as const;
+
+        const currentCacheUserSubscription =
+          (await this.cacheService.get(cacheUserSubscriptionStore)) ?? [];
+
+        if (
+          //check if the user data is not already present in user store
+          !currentCacheUserSubscription.includes(cacheUserSubscriptionStore)
+        ) {
+          currentCacheUserSubscription.push(cacheKey);
+
+          // Save data to cache
+          await this.cacheService.set(
+            cacheUserSubscriptionStore,
+            currentCacheUserSubscription,
+          );
+        }
+        return processedUserSubscriptions;
       }
     } catch (error) {
       console.error(
@@ -204,13 +257,13 @@ export class UserSubscriptionsService {
     billingCycle: BillingCycle,
     startDateSubscription: Date,
   ) {
-    const paymentDates: dayjs.Dayjs[] = [];
+    const paymentDates: Date[] = [];
     let currentDate = dayjs(startDate);
 
     while (currentDate.isBefore(dayjs(targetDate))) {
       // check if date payement is in the targeted month
       if (this.isInTargetPeriod(currentDate, targetDate, startDate)) {
-        paymentDates.push(currentDate);
+        paymentDates.push(currentDate.toDate());
       }
       currentDate = this.getNextPaymentDate(
         billingCycle,
@@ -289,7 +342,7 @@ export class UserSubscriptionsService {
           ' userSubscription not found with the given ID: ' + id,
         );
       }
-      let subscriptionId: number | null = null
+      let subscriptionId: number | null = null;
 
       const subscription = await this.subscriptionsService.findByName(
         updateUserSubscriptionDto.subscriptionName,
@@ -298,10 +351,10 @@ export class UserSubscriptionsService {
         /* Create new subscription  with the new name, therefor we have an id to update the user subscription */
         const responseNewSubscription = await this.subscriptionsService.create({
           name: updateUserSubscriptionDto.subscriptionName,
-        })
-        subscriptionId = responseNewSubscription.id
+        });
+        subscriptionId = responseNewSubscription.id;
       } else {
-        subscriptionId = subscription.id
+        subscriptionId = subscription.id;
       }
 
       // TODO : check if newUserSubscription is complete. if not throw an error
@@ -336,7 +389,8 @@ export class UserSubscriptionsService {
         // you need to release a queryRunner which was manually instantiated
         await queryRunner.release();
       }
-
+      // TODO : invalidate CACHE
+      await this.invalidCacheUser(updateUserSubscriptionDto.userId);
       return `Updated successfully user-subscription`;
     } catch (error) {
       throw new InternalServerErrorException(
@@ -346,9 +400,13 @@ export class UserSubscriptionsService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId) {
     try {
-      return await this.userSubscriptionRepository.delete({ id });
+      const result = await this.userSubscriptionRepository.delete({ id });
+      if (result.affected > 0) {
+        await this.invalidCacheUser(userId);
+      }
+      return result;
     } catch (error) {
       throw new InternalServerErrorException(
         'Error deleting user-subscription id: ' + id,

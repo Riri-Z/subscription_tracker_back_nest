@@ -79,16 +79,20 @@ export class UserSubscriptionsController {
     try {
       await this.userSubscriptionsService.update(id, updateUserSubscriptionDto);
       return this.apiResponseService.apiResponse(HttpStatus.OK);
-    } catch (e) {
+    } catch (err) {
+      console.error(err);
       throw new InternalServerErrorException(
         `Une erreur est survenue lors de la mis à jour de l'abonnement`,
       );
     }
   }
-
+  @ApiBearerAuth('jwt')
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    const result = await this.userSubscriptionsService.remove(+id);
+  async remove(@Request() req, @Param('id') id: string) {
+    const userId = req?.user?.sub;
+    if (!userId) throw new UnauthorizedException('Cannot retreive user');
+
+    const result = await this.userSubscriptionsService.remove(+id, userId);
     if (!result.affected) {
       return this.apiResponseService.apiResponse(HttpStatus.NOT_FOUND);
     }

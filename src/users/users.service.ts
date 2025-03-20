@@ -94,7 +94,7 @@ export class UsersService {
 
     user.activeResetId = randomUUID(); // Générer un identifiant unique
     const { id, ...userWithoutId } = user;
-    await this.update(user.id, userWithoutId);
+    await this.update(id, userWithoutId);
 
     const payload = {
       sub: user.id,
