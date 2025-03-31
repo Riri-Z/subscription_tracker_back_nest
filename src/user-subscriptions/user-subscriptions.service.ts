@@ -68,6 +68,9 @@ export class UserSubscriptionsService {
         'has been add to user :',
         createdUserSubscription.userId,
       );
+      // Clear cache user
+      await this.invalidCacheUser(createUserSubscriptionDto.userId);
+
       return createdUserSubscription;
     } catch (error) {
       console.log(error);
